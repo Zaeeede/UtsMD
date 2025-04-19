@@ -44,4 +44,73 @@ def main():
     loan_int_rate = st.slider("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
     loan_percent_income = st.slider("Persentase Pendapatan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
     cb_length = st.slider("Panjang Riwayat Kredit:", 0, int(data['cb_person_cred_hist_length'].max()))
-    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max))
+    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
+    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
+
+    # Buat DataFrame dari input user
+    user_data = pd.DataFrame([{
+        'person_age': age,
+        'person_gender': gender,
+        'person_education': education,
+        'person_income': income,
+        'person_emp_exp': emp_exp,
+        'person_home_ownership': home_ownership,
+        'loan_amnt': loan_amnt,
+        'loan_intent': loan_intent,
+        'loan_int_rate': loan_int_rate,
+        'loan_percent_income': loan_percent_income,
+        'cb_person_cred_hist_length': cb_length,
+        'credit_score': credit_score,
+        'previous_loan_defaults_on_file': default_history
+    }])
+
+    # --- NORMALISASI INPUT KATEGORIKAL ---
+    for col in cat_features:
+        if col in user_data.columns:
+            user_data[col] = user_data[col].astype(str).str.lower().str.strip()
+
+    with st.expander('**Data yang Anda Masukkan**'):
+        st.dataframe(user_data)
+
+    # --- PREDIKSI ---
+    try:
+        processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
+        prediction = loaded_model.predict(processed_data)[0]
+        prediction_probs = loaded_model.predict_proba(processed_data)
+
+        inverse_target_vals = {v: k for k, v in loaded_target_vals.items()}
+        pred_label = inverse_target_vals[prediction]
+
+        st.success(f"**Prediksi Loan Status: {prediction} [{pred_label}]**")
+        st.subheader("Probabilitas Tiap Kelas:")
+        prob_df = pd.DataFrame(prediction_probs, columns=[inverse_target_vals[i] for i in range(len(inverse_target_vals))])
+        st.dataframe(prob_df)
+
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat memproses data: {e}")
+
+# --- FUNGSI PREPROCESS ---
+def preprocess_data(data, encoder, scaler):
+    cat_cols = encoder.feature_names_in_
+    num_cols = scaler.feature_names_in_
+
+    # Transformasi kategorikal
+    data_encoded = pd.DataFrame(
+        encoder.transform(data[cat_cols]),
+        columns=encoder.get_feature_names_out(),
+        index=data.index
+    )
+
+    # Transformasi numerik
+    data_scaled = pd.DataFrame(
+        scaler.transform(data[num_cols]),
+        columns=num_cols,
+        index=data.index
+    )
+
+    # Gabungkan keduanya
+    return pd.concat([data_encoded, data_scaled], axis=1)
+
+# --- MAIN APP ---
+if __name__ == '__main__':
+    main()
