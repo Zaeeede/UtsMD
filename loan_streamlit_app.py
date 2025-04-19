@@ -34,7 +34,7 @@ def main():
 
     # --- INPUT USER ---
     age = st.slider("Umur Anda:", 18, int(data['person_age'].max()))
-    gender = st.selectbox("Gender:", sorted(data['person_gender'].dropna().unique()))
+    gender = st.selectbox("Apa gender anda?:", sorted(clean_categories(data['person_gender'])))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
     income = st.slider("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
     emp_exp = st.slider("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
@@ -89,7 +89,16 @@ def main():
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memproses data: {e}")
 
-# --- FUNGSI PREPROCESS ---
+def clean_categories(series):
+    return (
+        series
+        .dropna()
+        .astype(str)
+        .str.lower()
+        .str.replace(' ', '')
+        .unique()
+    )
+
 # --- FUNGSI PREPROCESS ---
 def preprocess_data(data, encoder, scaler):
     try:
