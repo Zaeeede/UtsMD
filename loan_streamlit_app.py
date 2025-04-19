@@ -54,7 +54,7 @@ def main():
     )
 
     max_loan_amnt = data['loan_amnt'].max()
-    loan_amnt = st.slider("What is your loan_amnt?", 0, max_loan_amnt)
+    loan_amnt = st.slider("What is your loan_amnt?", 0.0, max_loan_amnt)
     
     loan_intent_data = data['loan_intent'].unique() 
     loan_intent = st.selectbox(
