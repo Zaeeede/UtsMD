@@ -102,6 +102,8 @@ def main():
     st.write("Kolom di user_data:", data.columns.tolist())
     st.write("Kolom dibutuhkan oleh encoder:", encoder.feature_names_in_.tolist())
 
+    if 'loan_status' in user_data.columns:
+    user_data = user_data.drop(columns=['loan_status']
     processed_data = preprocess_data(data=user_data, encoder=loaded_encoder, scaler=loaded_scaler)
     predictions = loaded_model.predict(processed_data)
     print(predictions)
