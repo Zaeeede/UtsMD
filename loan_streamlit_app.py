@@ -33,7 +33,7 @@ def main():
     num_features = loaded_scaler.feature_names_in_
 
     # --- INPUT USER ---
-    age = st.numer_input("Umur Anda:", 20, int(data['person_age'].max()))
+    age = st.number_input("Umur Anda:", 20, int(data['person_age'].max()))
     gender = st.selectbox("Apa gender anda?:", sorted(clean_categories(data['person_gender'])))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
     income = st.slider("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
