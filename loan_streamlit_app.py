@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-with open('Loan_XGB_Model.pkl', 'rb') as file:
+with open('XGB_model.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
 with open('scaler.pkl', 'rb') as file:
