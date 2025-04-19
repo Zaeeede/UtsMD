@@ -69,20 +69,23 @@ def main():
     with st.expander('**Data yang Anda Masukkan**'):
         st.dataframe(user_data)
 
-    # --- PREDIKSI ---
-    try:
-        processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
-        prediction = loaded_model.predict(processed_data)[0]  # Output berupa 0 atau 1
-        prediction_probs = loaded_model.predict_proba(processed_data)
+    # --- PREDIKSI DENGAN TOMBOL ---
+    if st.button("Prediksi"):
+        with st.spinner("Sedang memproses prediksi..."):
+            try:
+                processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
+                prediction = loaded_model.predict(processed_data)[0]
+                prediction_probs = loaded_model.predict_proba(processed_data)
 
-        # Mapping dari hasil prediksi ke label "Ditolak" atau "Diterima"
-        pred_label = "Ditolak" if prediction == 0 else "Diterima"
+                pred_label = "Ditolak" if prediction == 0 else "Diterima"
+                prob = prediction_probs[0][prediction] * 100
 
-        st.success(f"**Prediksi Loan Status: {prediction} [{pred_label}]**")
+                st.success(f"**Prediksi Loan Status: {pred_label} ({prob:.2f}%)**")
 
-    except Exception as e:
-        st.error(f"Terjadi kesalahan saat memproses data: {e}")
+            except Exception as e:
+                st.error(f"Terjadi kesalahan saat memproses data: {e}")
 
+# --- CLEAN KATEGORI ---
 def clean_categories(series):
     return (
         series
@@ -96,43 +99,40 @@ def clean_categories(series):
 # --- FUNGSI PREPROCESS ---
 def preprocess_data(data, encoder, scaler):
     try:
-        # Lowercase semua kategori agar konsisten
+        # Normalisasi input kategorikal
         for col in encoder.feature_names_in_:
             data[col] = data[col].str.lower().str.strip()
 
-        # Ambil kolom
+        # Split kolom
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
 
-        # Transform kategorikal
+        # Transformasi data
         data_encoded = pd.DataFrame(
             encoder.transform(data[cat_cols]),
             columns=encoder.get_feature_names_out(),
             index=data.index
         )
-
-        # Transform numerikal
         data_scaled = pd.DataFrame(
             scaler.transform(data[num_cols]),
             columns=num_cols,
             index=data.index
         )
 
-        # Gabungkan
+        # Gabung hasil transform
         all_features = pd.concat([data_encoded, data_scaled], axis=1)
 
-        # Validasi fitur sesuai dengan model
+        # Pastikan urutan kolom sesuai dengan model
         model_features = loaded_model.get_booster().feature_names
         missing = set(model_features) - set(all_features.columns)
         if missing:
             raise ValueError(f"Data yang diproses tidak memiliki fitur: {missing}")
 
-        return all_features[model_features]  # urutkan agar sesuai model
+        return all_features[model_features]
 
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
         st.stop()
-
 
 # --- MAIN APP ---
 if __name__ == '__main__':
