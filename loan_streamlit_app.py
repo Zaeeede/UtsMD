@@ -75,11 +75,11 @@ def main():
     # --- PREDIKSI ---
     try:
         processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
-        prediction = loaded_model.predict(processed_data)[0]
+        prediction = loaded_model.predict(processed_data)[0]  # Output berupa 0 atau 1
         prediction_probs = loaded_model.predict_proba(processed_data)
 
-        inverse_target_vals = {v: k for k, v in loaded_target_vals.items()}
-        pred_label = inverse_target_vals[prediction]
+        # Mapping dari hasil prediksi ke label "Ditolak" atau "Diterima"
+        pred_label = "Ditolak" if prediction == 0 else "Diterima"
 
         st.success(f"**Prediksi Loan Status: {prediction} [{pred_label}]**")
         st.subheader("Probabilitas Tiap Kelas:")
