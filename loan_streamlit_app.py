@@ -84,7 +84,7 @@ def main():
     user_data = pd.DataFrame([{
         'person_age': age,
         'person_gender': gender, 
-        'persoon_education': education,
+        'person_education': education,
         'person_income': income,
         'person_emp_exp': emp_exp,
         'person_home_ownership': home_ownership,
