@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
+# Load model dan preprocessing tools
 with open('Loan_XGB_Model.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
@@ -15,75 +16,63 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
+# Fungsi Preprocessing
+def preprocess_data(data, encoder, scaler):
+    # Koreksi nilai jika perlu
+    data['person_gender'] = data['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
+
+    # Kolom kategorikal dan numerik
+    cat_cols = encoder.feature_names_in_
+    num_cols = scaler.feature_names_in_
+
+    # Cek kolom yang hilang
+    expected_cols = set(cat_cols) | set(num_cols)
+    missing_cols = expected_cols - set(data.columns)
+    if missing_cols:
+        raise ValueError(f"Missing columns in input: {missing_cols}")
+
+    # Transformasi
+    data_encoded = pd.DataFrame(encoder.transform(data[cat_cols]),
+                                columns=encoder.get_feature_names_out(),
+                                index=data.index)
+    data_scaled = pd.DataFrame(scaler.transform(data[num_cols]),
+                               columns=num_cols,
+                               index=data.index)
+
+    return pd.concat([data_encoded, data_scaled], axis=1)
+
+# Streamlit App
 def main():
-    st.title('Machine Leaning Loan_Status Prediction App')
+    st.title('Machine Learning Loan_Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
     st.subheader('NIM: 2702354741')
     st.info('This app will predict your Loan_Status!')
-    
-    with st.expander('**Data**'):
-        data = pd.read_csv('Dataset_A_loan.csv')
-        st.write('This is a raw data')
+
+    # Load data untuk referensi nilai input
+    data = pd.read_csv('Dataset_A_loan.csv')
+
+    with st.expander('📊 View Raw Data'):
         st.dataframe(data)
 
-    max_age = data['person_age'].max()
-    age = st.slider("Berapa umur anda", 0, int(max_age))
-    
-    gender_data = data['person_gender'].unique()
-    gender = st.selectbox(
-        'Apa gender anda?', 
-        gender_data,
-    )
-    
-    education_data = data['person_education'].unique()
-    education = st.selectbox(
-        'Apa tingkat pendidikan tertinggi anda?', 
-        education_data,
-    )
-    
-    max_income = data['person_income'].max()
-    income = st.slider("Berapa julah pendapatan tahunan anda?", 0.0, max_income)
-    
-    max_emp_exp = data['person_emp_exp'].max()
-    emp_exp = st.slider("Berapa tahun pengalaman kerja anda?", 0, max_emp_exp)
+    # Ambil nilai unik dan maksimum untuk field input
+    age = st.slider("Berapa umur anda?", 0, int(data['person_age'].max()))
+    gender = st.selectbox("Apa gender anda?", sorted(data['person_gender'].dropna().unique()))
+    education = st.selectbox("Apa tingkat pendidikan tertinggi anda?", sorted(data['person_education'].dropna().unique()))
+    income = st.slider("Berapa jumlah pendapatan tahunan anda?", 0.0, float(data['person_income'].max()))
+    emp_exp = st.slider("Berapa tahun pengalaman kerja anda?", 0, int(data['person_emp_exp'].max()))
+    home_ownership = st.selectbox("Apakah anda punya rumah?", sorted(data['person_home_ownership'].dropna().unique()))
+    loan_amnt = st.slider("Berapa jumlah pinjaman anda?", 0.0, float(data['loan_amnt'].max()))
+    loan_intent = st.selectbox("Apa tujuan pinjaman anda?", sorted(data['loan_intent'].dropna().unique()))
+    loan_int_rate = st.slider("Berapa suku bunga pinjaman anda?", 0.0, float(data['loan_int_rate'].max()))
+    loan_percent_income = st.slider("Berapa persen penghasilan anda untuk pinjaman?", 0.0, float(data['loan_percent_income'].max()))
+    cb_person_cred_hist_length = st.slider("Berapa lama riwayat kredit anda?", 0.0, float(data['cb_person_cred_hist_length'].max()))
+    credit_score = st.slider("Berapa skor kredit anda?", 0, int(data['credit_score'].max()))
+    previous_loan_defaults_on_file = st.selectbox("Apakah ada riwayat gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
 
-    home_ownership_data = data['person_home_ownership'].unique()
-    home_ownership = st.selectbox(
-        'Do you have a home?', 
-        home_ownership_data,
-    )
-
-    max_loan_amnt = data['loan_amnt'].max()
-    loan_amnt = st.slider("What is your loan_amnt?", 0.0, max_loan_amnt)
-    
-    loan_intent_data = data['loan_intent'].unique() 
-    loan_intent = st.selectbox(
-        'Do you have loan_intent?', 
-        loan_intent_data,
-    )
-    
-    max_loan_int_rate = data['loan_int_rate'].max()
-    loan_int_rate = st.slider('What is your loan rate?', 0.0, max_loan_int_rate)
-    
-    max_loan_percent_income = data['loan_percent_income'].max()
-    loan_percent_income = st.slider('What is your percent?', 0.0, max_loan_percent_income)
-
-    max_cb_person_cred_hist_length = data['cb_person_cred_hist_length'].max()
-    cb_person_cred_hist_length = st.slider('What is your cb_person_cred_hist_length?', 0.0, max_cb_person_cred_hist_length)
-
-    max_credit_score = data['credit_score'].max()
-    credit_score = st.slider('What is your credit_score?', 0, max_credit_score)
-    
-    previous_loan_defaults_on_file_data = data['previous_loan_defaults_on_file'].unique()
-    previous_loan_defaults_on_file = st.selectbox(
-        'How often do you previous_loan_defaults_on_file?', 
-        previous_loan_defaults_on_file_data,
-    )
-    
-    st.write('Data input by user')
+    # Buat data user
     user_data = pd.DataFrame([{
         'person_age': age,
-        'person_gender': gender, 
+        'person_gender': gender,
         'person_education': education,
         'person_income': income,
         'person_emp_exp': emp_exp,
@@ -95,29 +84,24 @@ def main():
         'cb_person_cred_hist_length': cb_person_cred_hist_length,
         'credit_score': credit_score,
         'previous_loan_defaults_on_file': previous_loan_defaults_on_file
-        }])
-    st.dataframe(pd.DataFrame(user_data))
-    
-    st.write('Loan Status Prediction')
-    if 'loan_status' in user_data.columns:
-        user_data = user_data.drop(columns=['loan_status'])
-    processed_data = preprocess_data(data=user_data, encoder=loaded_encoder, scaler=loaded_scaler)
-    predictions = loaded_model.predict(processed_data)
-    print(predictions)
-    inverse_target_vals = {v: k for k, v in loaded_target_vals.items()}
-    prediction_probs = loaded_model.predict_proba(processed_data)
-    st.dataframe(pd.DataFrame(prediction_probs, columns=inverse_target_vals.values()))
-    st.write('The predicted output is: ', predictions[0], '**[', inverse_target_vals[predictions[0]] ,']**')
+    }])
 
-def preprocess_data(data, encoder, scaler):
-    cat_cols = encoder.feature_names_in_
-    num_cols = scaler.feature_names_in_
-    
-    data_encoded = pd.DataFrame(encoder.transform(data[cat_cols]), columns=encoder.get_feature_names_out())
-    data_scaled = pd.DataFrame(scaler.transform(data[num_cols]), columns=num_cols)
+    st.write('🔍 Data input oleh user')
+    st.dataframe(user_data)
 
-    return pd.concat([data_encoded, data_scaled], axis=1)
+    if st.button('Predict Loan Status'):
+        try:
+            processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
+            prediction = loaded_model.predict(processed_data)[0]
+            prediction_probs = loaded_model.predict_proba(processed_data)[0]
 
-    
+            inverse_target_vals = {v: k for k, v in loaded_target_vals.items()}
+
+            st.success(f"✅ Prediksi Status Pinjaman Anda: **{inverse_target_vals[prediction]}**")
+            st.subheader("📈 Probabilitas Prediksi:")
+            st.dataframe(pd.DataFrame([prediction_probs], columns=[inverse_target_vals[i] for i in range(len(prediction_probs))]))
+        except Exception as e:
+            st.error(f"❌ Terjadi kesalahan saat memproses data: {e}")
+
 if __name__ == '__main__':
     main()
