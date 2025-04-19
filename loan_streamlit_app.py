@@ -27,25 +27,25 @@ def main():
         st.dataframe(data)
 
     max_age = data['person_age'].max()
-    age = st.slider("What is your Age?", 0, int(max_age))
+    age = st.slider("Berapa umur anda", 0, int(max_age))
     
     gender_data = data['person_gender'].unique()
     gender = st.selectbox(
-        'What is your Gender?', 
+        'Apa gender anda?', 
         gender_data,
     )
     
     education_data = data['person_education'].unique()
     education = st.selectbox(
-        'What is your Education?', 
+        'Apa tingkat pendidikan tertinggi anda?', 
         education_data,
     )
     
     max_income = data['person_income'].max()
-    income = st.slider("What is your income?", 0.0, max_income)
+    income = st.slider("Berapa julah pendapatan tahunan anda?", 0.0, max_income)
     
     max_emp_exp = data['person_emp_exp'].max()
-    emp_exp = st.slider("What is your emp_exp?", 0, max_emp_exp)
+    emp_exp = st.slider("Berapa tahun pengalaman kerja anda?", 0, max_emp_exp)
 
     home_ownership_data = data['person_home_ownership'].unique()
     home_ownership = st.selectbox(
