@@ -42,7 +42,7 @@ def main():
     )
     
     max_income = data['person_income'].max()
-    income = st.slider("What is your income?", 0, max_income)
+    income = st.slider("What is your income?", 0.0, max_income)
     
     max_emp_exp = data['person_emp_exp'].max()
     emp_exp = st.slider("What is your emp_exp?", 0, max_emp_exp)
