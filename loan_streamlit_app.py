@@ -108,12 +108,16 @@ def main():
     st.write('The predicted output is: ', predictions[0], '**[', inverse_target_vals[predictions[0]] ,']**')
     
     st.header('🥳')
-    
+
 def preprocess_data(data, encoder, scaler):
-    data_encoded = pd.DataFrame(encoder.transform(data.select_dtypes(exclude=np.number)), columns=encoder.get_feature_names_out())
-    data_scaled = pd.DataFrame(scaler.transform(data.select_dtypes(include=np.number)), columns=data.select_dtypes(include=np.number).columns)
-    data = pd.concat([data_encoded, data_scaled], axis=1)
-    return data
+    cat_cols = encoder.feature_names_in_
+    num_cols = scaler.feature_names_in_
+    
+    data_encoded = pd.DataFrame(encoder.transform(data[cat_cols]), columns=encoder.get_feature_names_out())
+    data_scaled = pd.DataFrame(scaler.transform(data[num_cols]), columns=num_cols)
+
+    return pd.concat([data_encoded, data_scaled], axis=1)
+
     
 if __name__ == '__main__':
     main()
