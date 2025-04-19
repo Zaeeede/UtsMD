@@ -27,7 +27,7 @@ def main():
         st.dataframe(data)
 
     max_age = data['person_age'].max()
-    age = st.slider("What is your Age?", 0, max_age)
+    age = st.slider("What is your Age?", 0, int(max_age))
     
     gender_data = data['person_gender'].unique()
     gender = st.selectbox(
