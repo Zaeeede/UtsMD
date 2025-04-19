@@ -114,8 +114,8 @@ def preprocess_data(data, encoder, scaler):
         )
 
         # Gabungkan
-        return pd.concat([data_encoded, data_scaled], axis=1)
+            return pd.concat([data_encoded, data_scaled], axis=1)
 
 # --- MAIN APP ---
-    if __name__ == '__main__':
-        main()
+if __name__ == '__main__':
+    main()
