@@ -25,9 +25,6 @@ def main():
     # Load data asli
     data = pd.read_csv('Dataset_A_loan.csv')
     
-    with st.expander('**Sample Raw Data**'):
-        st.dataframe(data.head())
-
     # Ambil kategori dari encoder agar sinkron
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
@@ -37,13 +34,13 @@ def main():
     gender = st.selectbox("Apa gender anda?:", sorted(clean_categories(data['person_gender'])))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
     income = st.slider("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
-    emp_exp = st.slider("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
+    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
     home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
     loan_amnt = st.slider("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()))
     loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()))
-    loan_int_rate = st.slider("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
-    loan_percent_income = st.slider("Persentase Pendapatan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
-    cb_length = st.slider("Panjang Riwayat Kredit:", 0, int(data['cb_person_cred_hist_length'].max()))
+    loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
+    loan_percent_income = st.number_input("Persentase Pendapatan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
+    cb_length = st.number_input("Panjang Riwayat Kredit:", 0, int(data['cb_person_cred_hist_length'].max()))
     credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
     default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
 
