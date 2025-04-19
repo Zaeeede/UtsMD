@@ -91,25 +91,30 @@ def main():
 
 # --- FUNGSI PREPROCESS ---
 def preprocess_data(data, encoder, scaler):
-    cat_cols = encoder.feature_names_in_
-    num_cols = scaler.feature_names_in_
+    try:
+        # Lowercase semua kategori agar konsisten
+        for col in encoder.feature_names_in_:
+            data[col] = data[col].str.lower().str.strip()
+        
+        cat_cols = encoder.feature_names_in_
+        num_cols = scaler.feature_names_in_
 
-    # Transformasi kategorikal
-    data_encoded = pd.DataFrame(
-        encoder.transform(data[cat_cols]),
-        columns=encoder.get_feature_names_out(),
-        index=data.index
-    )
+        # Transform kategorikal
+        data_encoded = pd.DataFrame(
+            encoder.transform(data[cat_cols]),
+            columns=encoder.get_feature_names_out(),
+            index=data.index
+        )
 
-    # Transformasi numerik
-    data_scaled = pd.DataFrame(
-        scaler.transform(data[num_cols]),
-        columns=num_cols,
-        index=data.index
-    )
+        # Transform numerikal
+        data_scaled = pd.DataFrame(
+            scaler.transform(data[num_cols]),
+            columns=num_cols,
+            index=data.index
+        )
 
-    # Gabungkan keduanya
-    return pd.concat([data_encoded, data_scaled], axis=1)
+        # Gabungkan
+        return pd.concat([data_encoded, data_scaled], axis=1)
 
 # --- MAIN APP ---
 if __name__ == '__main__':
