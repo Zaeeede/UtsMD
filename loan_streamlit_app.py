@@ -25,9 +25,6 @@ def main():
         data = pd.read_csv('Dataset_A_loan.csv')
         st.write('This is a raw data')
         st.dataframe(data)
-     
-    with st.expander('**Data Visualization**'):
-        st.scatter_chart(data, x='Height', y='Weight', color='loan_status')
 
     max_age = data['person_age'].max()
     age = st.slider("What is your Age?", 0, max_age)
