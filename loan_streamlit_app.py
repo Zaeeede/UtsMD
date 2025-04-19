@@ -90,12 +90,14 @@ def main():
         st.error(f"Terjadi kesalahan saat memproses data: {e}")
 
 # --- FUNGSI PREPROCESS ---
+# --- FUNGSI PREPROCESS ---
 def preprocess_data(data, encoder, scaler):
     try:
         # Lowercase semua kategori agar konsisten
         for col in encoder.feature_names_in_:
             data[col] = data[col].str.lower().str.strip()
-        
+
+        # Ambil kolom
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
 
@@ -114,7 +116,20 @@ def preprocess_data(data, encoder, scaler):
         )
 
         # Gabungkan
-        return pd.concat([data_encoded, data_scaled], axis=1)
+        all_features = pd.concat([data_encoded, data_scaled], axis=1)
+
+        # Validasi fitur sesuai dengan model
+        model_features = loaded_model.get_booster().feature_names
+        missing = set(model_features) - set(all_features.columns)
+        if missing:
+            raise ValueError(f"Data yang diproses tidak memiliki fitur: {missing}")
+
+        return all_features[model_features]  # urutkan agar sesuai model
+
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
+        st.stop()
+
 
 # --- MAIN APP ---
 if __name__ == '__main__':
