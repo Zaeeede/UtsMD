@@ -99,8 +99,8 @@ def main():
     st.dataframe(pd.DataFrame(user_data))
     
     st.write('Loan Status Prediction')
-    st.write("Kolom di user_data:", data.columns.tolist())
-    st.write("Kolom dibutuhkan oleh encoder:", loaded_encoder.feature_names_in_.tolist())
+    st.write(user_data.columns.tolist())
+    st.write(loaded_encoder.feature_names_in_.tolist())
 
 
     if 'loan_status' in user_data.columns:
