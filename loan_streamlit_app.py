@@ -99,9 +99,6 @@ def main():
     st.dataframe(pd.DataFrame(user_data))
     
     st.write('Loan Status Prediction')
-    st.write("Fitur yang diharapkan model:", loaded_model.get_booster().feature_names)
-    st.write("Fitur yang dikirim untuk prediksi:", processed_data.columns.tolist())
-
     if 'loan_status' in user_data.columns:
         user_data = user_data.drop(columns=['loan_status'])
     processed_data = preprocess_data(data=user_data, encoder=loaded_encoder, scaler=loaded_scaler)
