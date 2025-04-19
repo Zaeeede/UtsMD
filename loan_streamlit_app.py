@@ -53,7 +53,7 @@ def main():
     home_ownership_data = data['person_home_ownership'].unique()
     home_ownership = st.selectbox(
         'Do you have a home?', 
-        family_history_data,
+        home_ownership_data,
     )
 
     max_loan_amnt = data['loan_amnt'].max()
