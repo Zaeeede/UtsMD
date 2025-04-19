@@ -83,7 +83,9 @@ def main():
 
         st.success(f"**Prediksi Loan Status: {prediction} [{pred_label}]**")
         st.subheader("Probabilitas Tiap Kelas:")
-        prob_df = pd.DataFrame(prediction_probs, columns=[inverse_target_vals[i] for i in range(len(inverse_target_vals))])
+        
+        # Gunakan loaded_target_vals untuk membuat kolom label
+        prob_df = pd.DataFrame(prediction_probs, columns=[loaded_target_vals[i] for i in range(len(loaded_target_vals))])
         st.dataframe(prob_df)
 
     except Exception as e:
