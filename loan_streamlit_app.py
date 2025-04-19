@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-
 with open('XGB_model.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
