@@ -69,7 +69,7 @@ def main():
     loan_percent_income = st.slider('What is your percent?', 0.0, max_loan_percent_income)
 
     max_cb_person_cred_hist_length = data['cb_person_cred_hist_length'].max()
-    cb_person_cred_hist_length = st.slider('What is your cb_person_cred_hist_length?', 0, max_cb_person_cred_hist_length)
+    cb_person_cred_hist_length = st.slider('What is your cb_person_cred_hist_length?', 0.0, max_cb_person_cred_hist_length)
 
     max_credit_score = data['credit_score'].max()
     credit_score = st.slider('What is your credit_score?', 0, max_credit_score)
