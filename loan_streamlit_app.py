@@ -4,126 +4,105 @@ import numpy as np
 import pickle as pkl
 
 
-with open('obesity-prediction-streamlit/rf_model.pkl', 'rb') as file:
+with open('XGB_model.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
-with open('obesity-prediction-streamlit/scaler.pkl', 'rb') as file:
+with open('scaler.pkl', 'rb') as file:
     loaded_scaler = pkl.load(file)
 
-with open('obesity-prediction-streamlit/encoder.pkl', 'rb') as file:
+with open('encoder.pkl', 'rb') as file:
     loaded_encoder = pkl.load(file)
 
-with open('obesity-prediction-streamlit/target_vals.pkl', 'rb') as file:
+with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
 def main():
-    st.title('Machine Leaning Obesity Prediction App')
-    st.subheader('Name: Benjamin Eleazar Manafe')
-    st.subheader('NIM: 2702340704')
-    st.info('This app will predict your obesity level!')
+    st.title('Machine Leaning Loan_Status Prediction App')
+    st.subheader('Name: Dennis Purnomo Yohaidi')
+    st.subheader('NIM: 2702354741')
+    st.info('This app will predict your Loan_Status!')
     
     with st.expander('**Data**'):
-        data = pd.read_csv('obesity-prediction-streamlit/ObesityDataSet_raw_and_data_sinthetic.csv')
+        data = pd.read_csv('Dataset_A_loan.csv')
         st.write('This is a raw data')
         st.dataframe(data)
-    
+     
     with st.expander('**Data Visualization**'):
-        st.scatter_chart(data, x='Height', y='Weight', color='NObeyesdad')
+        st.scatter_chart(data, x='Height', y='Weight', color='loan_status')
+
+    max_age = data['person_age'].max()
+    age = st.slider("What is your Age?", 0, max_age)
     
-    gender_data = data['Gender'].unique()
+    gender_data = data['person_gender'].unique()
     gender = st.selectbox(
         'What is your Gender?', 
         gender_data,
     )
     
-    max_age = data['Age'].max()
-    age = st.slider("What is your Age?", 0, max_age)
+    education_data = data['person_education'].unique()
+    education = st.selectbox(
+        'What is your Education?', 
+        education_data,
+    )
     
-    max_height = data['Height'].max()
-    height = st.slider("What is your Height?", 0.0, max_height)
+    max_income = data['person_income'].max()
+    income = st.slider("What is your income?", 0, max_income)
     
-    max_weight = data['Weight'].max()
-    weight = st.slider("What is your Weight?", 0.0, max_weight)
-    
-    family_history_data = data['family_history_with_overweight'].unique()
-    family_history = st.selectbox(
-        'Do you have a family history with overweight?', 
+    max_emp_exp = data['person_emp_exp'].max()
+    emp_exp = st.slider("What is your emp_exp?", 0, max_emp_exp)
+
+    home_ownership_data = data['person_home_ownership'].unique()
+    home_ownership = st.selectbox(
+        'Do you have a home?', 
         family_history_data,
     )
+
+    max_loan_amnt = data['loan_amnt'].max()
+    loan_amnt = st.slider("What is your loan_amnt?", 0, max_loan_amnt)
     
-    favc_data = data['FAVC'].unique()
-    favc = st.selectbox(
-        'Do you have FAVC (frequent consumption of high-caloric food)?', 
-        favc_data,
+    loan_intent_data = data['loan_intent'].unique() 
+    loan_intent = st.selectbox(
+        'Do you have loan_intent?', 
+        loan_intent_data,
     )
     
-    max_fcvc = data['FCVC'].max()
-    fcvc = st.slider('What is your FCVC (frequency of consumption of vegetables)?', 0.0, max_fcvc)
+    max_loan_int_rate = data['loan_int_rate'].max()
+    loan_int_rate = st.slider('What is your FCVC (frequency of consumption of vegetables)?', 0, max_loan_int_rate)
     
-    max_ncp = data['NCP'].max()
-    ncp = st.slider('What is your NCP (number of main meals)?', 0.0, max_ncp)
+    max_loan_percent_income = data['loan_percent_income'].max()
+    loan_percent_income = st.slider('What is your NCP (number of main meals)?', 0.0, max_loan_percent_income)
+
+    max_cb_person_cred_hist_length = data['cb_person_cred_hist_length'].max()
+    cb_person_cred_hist_length = st.slider('What is your cb_person_cred_hist_length?', 0, max_cb_person_cred_hist_length)
+
+    max_credit_score = data['credit_score'].max()
+    credit_score = st.slider('What is your credit_score?', 0, max_credit_score)
     
-    caec_data = data['CAEC'].unique()
-    caec = st.selectbox(
-        'How often do you CAEC (consumption of food between meals)?', 
-        caec_data,
-    )
-    
-    smoke_data = data['SMOKE'].unique()
-    smoke = st.selectbox(
-        'Do you smoke?', 
-        smoke_data,
-    )
-    
-    max_ch2o = data['CH2O'].max()
-    ch2o = st.slider('What is your CH2O (consumption of water daily)?', 0.0, max_ch2o)
-    
-    scc_data = data['SCC'].unique()
-    scc = st.selectbox(
-        'Do you have SCC (squamous cell carcinoma)?', 
-        scc_data,
-    )
-    
-    max_faf = data['FAF'].max()
-    faf = st.slider('How often do you do FAF (Physical activity frequency)?', 0.0, max_faf)
-    
-    max_tue = data['TUE'].max()
-    tue = st.slider('How often do you do TUE?', 0.0, max_tue)
-    
-    calc_data = data['CALC'].unique()
-    calc = st.selectbox(
-        'How often do you do CALC (consumption of alcohol)?', 
-        calc_data,
-    )
-    
-    mtrans_data = data['MTRANS'].unique()
-    mtrans = st.selectbox(
-        'What is you main Transportation?',
-        mtrans_data,
+    previous_loan_defaults_on_file_data = data['previous_loan_defaults_on_file'].unique()
+    previous_loan_defaults_on_file = st.selectbox(
+        'How often do you previous_loan_defaults_on_file?', 
+        previous_loan_defaults_on_file_data,
     )
     
     st.write('Data input by user')
     user_data = pd.DataFrame([{
-        'Gender': gender,
-        'Age': age,
-        'Height': height,
-        'Weight': weight,
-        'family_history_with_overweight': family_history,
-        'FAVC': favc,
-        'FCVC': fcvc,
-        'NCP': ncp,
-        'CAEC': caec,
-        'SMOKE': smoke,
-        'CH2O': ch2o,
-        'SCC': scc,
-        'FAF': faf,
-        'TUE': tue,
-        'CALC': calc,
-        'MTRANS': mtrans
+        'person_age': age,
+        'person_gender': gender, 
+        'education': education,
+        'income': income,
+        'emp_exp': emp_exp,
+        'home_ownership': home_ownership,
+        'loan_amnt': loan_amnt,
+        'loan_intent': loan_intent,
+        'loan_int_rate': loan_int_rate,
+        'loan_percent_income': loan_percent_income,
+        'cb_person_cred_hist_length': cb_person_cred_hist_length,
+        'credit_score': credit_score,
+        'previous_loan_defaults_on_file': previous_loan_defaults_on_file
         }])
     st.dataframe(pd.DataFrame(user_data))
     
-    st.write('Obesity Prediction')
+    st.write('Loan Status Prediction')
     processed_data = preprocess_data(data=user_data, encoder=loaded_encoder, scaler=loaded_scaler)
     predictions = loaded_model.predict(processed_data)
     print(predictions)
