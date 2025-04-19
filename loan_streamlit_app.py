@@ -44,4 +44,4 @@ def main():
     loan_int_rate = st.slider("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
     loan_percent_income = st.slider("Persentase Pendapatan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
     cb_length = st.slider("Panjang Riwayat Kredit:", 0, int(data['cb_person_cred_hist_length'].max()))
-    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max
+    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max)
