@@ -82,11 +82,6 @@ def main():
         pred_label = "Ditolak" if prediction == 0 else "Diterima"
 
         st.success(f"**Prediksi Loan Status: {prediction} [{pred_label}]**")
-        st.subheader("Probabilitas Tiap Kelas:")
-        
-        # Gunakan loaded_target_vals untuk membuat kolom label
-        prob_df = pd.DataFrame(prediction_probs, columns=[loaded_target_vals[i] for i in range(len(loaded_target_vals))])
-        st.dataframe(prob_df)
 
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memproses data: {e}")
