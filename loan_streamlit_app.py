@@ -99,10 +99,6 @@ def main():
     st.dataframe(pd.DataFrame(user_data))
     
     st.write('Loan Status Prediction')
-    st.write(user_data.columns.tolist())
-    st.write(loaded_encoder.feature_names_in_.tolist())
-
-
     if 'loan_status' in user_data.columns:
         user_data = user_data.drop(columns=['loan_status'])
     processed_data = preprocess_data(data=user_data, encoder=loaded_encoder, scaler=loaded_scaler)
@@ -112,8 +108,6 @@ def main():
     prediction_probs = loaded_model.predict_proba(processed_data)
     st.dataframe(pd.DataFrame(prediction_probs, columns=inverse_target_vals.values()))
     st.write('The predicted output is: ', predictions[0], '**[', inverse_target_vals[predictions[0]] ,']**')
-    
-    st.header('🥳')
 
 def preprocess_data(data, encoder, scaler):
     cat_cols = encoder.feature_names_in_
