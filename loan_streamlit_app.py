@@ -63,10 +63,10 @@ def main():
     )
     
     max_loan_int_rate = data['loan_int_rate'].max()
-    loan_int_rate = st.slider('What is your FCVC (frequency of consumption of vegetables)?', 0, max_loan_int_rate)
+    loan_int_rate = st.slider('What is your loan rate?', 0.0, max_loan_int_rate)
     
     max_loan_percent_income = data['loan_percent_income'].max()
-    loan_percent_income = st.slider('What is your NCP (number of main meals)?', 0.0, max_loan_percent_income)
+    loan_percent_income = st.slider('What is your percent?', 0.0, max_loan_percent_income)
 
     max_cb_person_cred_hist_length = data['cb_person_cred_hist_length'].max()
     cb_person_cred_hist_length = st.slider('What is your cb_person_cred_hist_length?', 0, max_cb_person_cred_hist_length)
