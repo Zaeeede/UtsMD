@@ -100,7 +100,8 @@ def main():
     
     st.write('Loan Status Prediction')
     st.write("Kolom di user_data:", data.columns.tolist())
-    st.write("Kolom dibutuhkan oleh encoder:", encoder.feature_names_in_.tolist())
+    st.write("Kolom dibutuhkan oleh encoder:", loaded_encoder.feature_names_in_.tolist())
+
 
     if 'loan_status' in user_data.columns:
         user_data = user_data.drop(columns=['loan_status'])
