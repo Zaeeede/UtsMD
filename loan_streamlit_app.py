@@ -99,6 +99,9 @@ def main():
     st.dataframe(pd.DataFrame(user_data))
     
     st.write('Loan Status Prediction')
+    st.write("Kolom di user_data:", data.columns.tolist())
+    st.write("Kolom dibutuhkan oleh encoder:", encoder.feature_names_in_.tolist())
+
     processed_data = preprocess_data(data=user_data, encoder=loaded_encoder, scaler=loaded_scaler)
     predictions = loaded_model.predict(processed_data)
     print(predictions)
