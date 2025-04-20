@@ -16,6 +16,9 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
+with open('feature_names.pkl', 'rb') as file:
+    model_features = pkl.load(file)
+
 def main():
     st.title('Machine Learning Loan Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
