@@ -24,35 +24,35 @@ def main():
 
     # Menampilkan test case
     accepted_case = {
-        'person_age': 35,
-        'person_gender': 'male',
+        'person_age': 25,
+        'person_gender': 'female',
         'person_education': 'high school',
-        'person_income': 80000.0,
-        'person_emp_exp': 10,
-        'person_home_ownership': 'rent',
-        'loan_amnt': 5000.0,
+        'person_income': 12438.0,
+        'person_emp_exp': 3,
+        'person_home_ownership': 'mortgage',
+        'loan_amnt': 5500.0,
         'loan_intent': 'medical',
-        'loan_int_rate': 5.27,
-        'loan_percent_income': 0.06,
-        'cb_person_cred_hist_length': 14,
-        'credit_score': 700,
+        'loan_int_rate': 12.87,
+        'loan_percent_income': 0.44,
+        'cb_person_cred_hist_length': 3,
+        'credit_score': 635,
         'previous_loan_defaults_on_file': 'no'
     }
 
     rejected_case = {
-        'person_age': 26,
-        'person_gender': 'female',
-        'person_education': 'college',
-        'person_income': 25000.0,
-        'person_emp_exp': 2,
+        'person_age': 25,
+        'person_gender': 'male',
+        'person_education': 'high school',
+        'person_income': 165792.0,
+        'person_emp_exp': 4,
         'person_home_ownership': 'rent',
-        'loan_amnt': 10000.0,
-        'loan_intent': 'debt consolidation',
-        'loan_int_rate': 15.27,
-        'loan_percent_income': 0.4,
-        'cb_person_cred_hist_length': 3,
-        'credit_score': 510,
-        'previous_loan_defaults_on_file': 'yes'
+        'loan_amnt': 34800.0,
+        'loan_intent': 'personal',
+        'loan_int_rate': 16.77,
+        'loan_percent_income': 0.21,
+        'cb_person_cred_hist_length': 2,
+        'credit_score': 662,
+        'previous_loan_defaults_on_file': 'no'
     }
 
     st.markdown("### 🔵 Contoh Test Case Diterima")
