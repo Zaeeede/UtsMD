@@ -1,93 +1,38 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import pickle as pkl  
+import pickle as pkl
+from sklearn.preprocessing import RobustScaler, OneHotEncoder
+from ModelXGB import ModelXGB  # pastikan class ModelXGB disimpan di file terpisah atau sesuaikan dengan import path
 
-# Load objek-objek model dan preprocessing
-with open('model_xgb.pkl', 'rb') as file:
-    loaded_model = pkl.load(file)
+# Memuat model, encoder, dan scaler yang sudah disimpan
+def load_model():
+    with open('model.pkl', 'rb') as f:
+        model = pkl.load(f)
+    with open('scaler.pkl', 'rb') as f:
+        scaler = pkl.load(f)
+    with open('encoder.pkl', 'rb') as f:
+        encoder = pkl.load(f)
+    with open('feature_names.pkl', 'rb') as f:
+        feature_names = pkl.load(f)
+    return model, scaler, encoder, feature_names
 
-with open('scaler.pkl', 'rb') as file:
-    loaded_scaler = pkl.load(file)
+# Menyiapkan input untuk prediksi
+def user_input_features():
+    age = st.number_input("Age", min_value=18, max_value=100, value=30)
+    gender = st.selectbox("Gender", options=["male", "female"])
+    education = st.selectbox("Education", options=["High School", "Associate", "Bachelor", "Master", "PhD"])
+    income = st.number_input("Income", min_value=0.0, value=50000.0)
+    emp_exp = st.number_input("Employment Experience (years)", min_value=0, value=5)
+    home_ownership = st.selectbox("Home Ownership", options=["OWN", "MORTGAGE", "RENT"])
+    loan_amnt = st.number_input("Loan Amount", min_value=0.0, value=20000.0)
+    loan_intent = st.selectbox("Loan Intent", options=["PERSONAL", "EDUCATION", "HOME", "AUTO", "MEDICAL"])
+    loan_int_rate = st.number_input("Loan Interest Rate", min_value=0.0, value=10.0)
+    loan_percent_income = st.number_input("Loan Percentage of Income", min_value=0.0, value=0.3)
+    cred_hist_length = st.number_input("Credit History Length (years)", min_value=0, value=5)
+    credit_score = st.number_input("Credit Score", min_value=0, max_value=850, value=700)
+    previous_loan_defaults = st.selectbox("Previous Loan Defaults", options=["Yes", "No"])
 
-with open('encoder.pkl', 'rb') as file:
-    loaded_encoder = pkl.load(file)
-
-with open('feature_names.pkl', 'rb') as file:
-    loaded_features = pkl.load(file)
-
-# Inisialisasi OOP
-model = ModelXGB(data='Dataset_A_loan.csv', loaded_model=loaded_model)
-model.data_split(target_column='loan_status')
-model.data_preprocessing(scaler=loaded_scaler, encoder=loaded_encoder, load_from_pickle=True)
-model.feature_names = loaded_features  # sinkronisasi fitur model
-
-# UI Streamlit
-def main():
-    st.title('Machine Learning Loan Status Prediction App')
-    st.subheader('Name: Dennis Purnomo Yohaidi')
-    st.subheader('NIM: 2702354741')
-    st.info('This app will predict your Loan Status!')
-
-    # Contoh data
-    accepted_case = {
-        'person_age': 25,
-        'person_gender': 'female',
-        'person_education': 'high school',
-        'person_income': 12438.0,
-        'person_emp_exp': 3,
-        'person_home_ownership': 'mortgage',
-        'loan_amnt': 5500.0,
-        'loan_intent': 'medical',
-        'loan_int_rate': 12.87,
-        'loan_percent_income': 0.44,
-        'cb_person_cred_hist_length': 3,
-        'credit_score': 635,
-        'previous_loan_defaults_on_file': 'no'
-    }
-
-    rejected_case = {
-        'person_age': 25,
-        'person_gender': 'male',
-        'person_education': 'high school',
-        'person_income': 165792.0,
-        'person_emp_exp': 4,
-        'person_home_ownership': 'rent',
-        'loan_amnt': 34800.0,
-        'loan_intent': 'personal',
-        'loan_int_rate': 16.77,
-        'loan_percent_income': 0.21,
-        'cb_person_cred_hist_length': 2,
-        'credit_score': 662,
-        'previous_loan_defaults_on_file': 'no'
-    }
-
-    st.markdown("### 🔵 Contoh Test Case Diterima")
-    st.dataframe(pd.DataFrame([accepted_case]))
-
-    st.markdown("### 🔴 Contoh Test Case Ditolak")
-    st.dataframe(pd.DataFrame([rejected_case]))
-
-    # Ambil opsi dari data
-    data = model.data
-    gender = st.selectbox("Gender:", sorted(data['person_gender'].dropna().unique()))
-    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
-    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
-    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()))
-    default_history = st.selectbox("Gagal Bayar Sebelumnya:", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
-
-    # Numeric inputs
-    age = st.number_input("Umur:", 20, 144, step=1)
-    income = st.number_input("Pendapatan Tahunan:", 0.0)
-    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, 100, step=1)
-    loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0)
-    loan_int_rate = st.number_input("Suku Bunga (%):", 0.0)
-    loan_percent_income = st.number_input("Persentase Pendapatan utk Pinjaman:", 0.0)
-    cb_length = st.number_input("Lama Histori Kredit (tahun):", 0, 100, step=1)
-    credit_score = st.slider("Skor Kredit:", 0, 850)
-
-    # Buat dataframe input
-    user_input = pd.DataFrame([{
+    data = {
         'person_age': age,
         'person_gender': gender,
         'person_education': education,
@@ -98,26 +43,46 @@ def main():
         'loan_intent': loan_intent,
         'loan_int_rate': loan_int_rate,
         'loan_percent_income': loan_percent_income,
-        'cb_person_cred_hist_length': cb_length,
+        'cb_person_cred_hist_length': cred_hist_length,
         'credit_score': credit_score,
-        'previous_loan_defaults_on_file': default_history
-    }])
+        'previous_loan_defaults_on_file': previous_loan_defaults
+    }
 
-    # Normalisasi nilai gender
-    user_input['person_gender'] = user_input['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
+    return pd.DataFrame([data])
 
-    with st.expander('Lihat Data Input'):
-        st.dataframe(user_input)
+# Fungsi untuk menampilkan hasil prediksi
+def predict_loan_status():
+    st.title("Loan Status Prediction")
 
-    # Prediksi
-    if st.button("Prediksi"):
-        try:
-            with st.spinner("Memproses..."):
-                prediction, probas = model.predict_input(user_input)
-                label = "Diterima" if prediction == 1 else "Ditolak"
-                st.success(f"**Status Pinjaman: {label} ({probas[prediction]*100:.2f}%)**")
-        except Exception as e:
-            st.error(f"Terjadi error: {e}")
+    model, scaler, encoder, feature_names = load_model()
+    new_input = user_input_features()
 
-if __name__ == '__main__':
-    main()
+    # Melakukan preprocessing data baru
+    encoded_input = pd.DataFrame(
+        encoder.transform(new_input[encoder.get_feature_names_out()]),
+        columns=encoder.get_feature_names_out(new_input.select_dtypes(include='object').columns),
+        index=new_input.index
+    )
+    
+    scaled_input = pd.DataFrame(
+        scaler.transform(new_input.select_dtypes(include='number')),
+        columns=new_input.select_dtypes(include='number').columns,
+        index=new_input.index
+    )
+
+    processed_input = pd.concat([scaled_input, encoded_input], axis=1)
+    processed_input = processed_input.reindex(columns=feature_names, fill_value=0)
+
+    # Melakukan prediksi
+    prediction = model.predict(processed_input)[0]
+    prediction_proba = model.predict_proba(processed_input)[0]
+
+    # Menampilkan hasil prediksi
+    st.write(f"Prediksi Status Pinjaman: {'Disetujui' if prediction == 1 else 'Ditolak'}")
+    st.write("Probabilitas per kelas:")
+    proba_df = pd.DataFrame(prediction_proba, index=model.classes_, columns=["Probabilitas"])
+    st.write(proba_df)
+
+# Jalankan aplikasi Streamlit
+if __name__ == "__main__":
+    predict_loan_status()
