@@ -2,111 +2,143 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle as pkl
-from xgboost import XGBClassifier
-from sklearn.preprocessing import OneHotEncoder, RobustScaler
 
-# ====== Class OOP Langsung di Streamlit ======
-class ModelXGB:
-    def __init__(self, data, loaded_model=None):
-        self.data = pd.read_csv(data)
-        self.fitted_model = loaded_model
 
-    def predict_input(self, input_data):
-        if self.fitted_model is None:
-            raise ValueError("Model belum dimuat!")
+with open('obesity-prediction-streamlit/rf_model.pkl', 'rb') as file:
+    loaded_model = pkl.load(file)
 
-        encoded_input = pd.DataFrame(
-            self.encoder.transform(input_data[self.cat_cols]),
-            columns=self.encoder.get_feature_names_out(self.cat_cols),
-            index=input_data.index
-        )
+with open('obesity-prediction-streamlit/scaler.pkl', 'rb') as file:
+    loaded_scaler = pkl.load(file)
 
-        scaled_input = pd.DataFrame(
-            self.scaler.transform(input_data[self.num_cols]),
-            columns=self.num_cols,
-            index=input_data.index
-        )
+with open('obesity-prediction-streamlit/encoder.pkl', 'rb') as file:
+    loaded_encoder = pkl.load(file)
 
-        processed_input = pd.concat([scaled_input, encoded_input], axis=1)
-        processed_input = processed_input.reindex(columns=self.feature_names, fill_value=0)
+with open('obesity-prediction-streamlit/target_vals.pkl', 'rb') as file:
+    loaded_target_vals = pkl.load(file)
 
-        prediction = self.fitted_model.predict(processed_input)[0]
-        prediction_proba = self.fitted_model.predict_proba(processed_input)[0]
-
-        return prediction, prediction_proba
-
-# ===== Load all assets =====
-@st.cache_resource
-def load_all():
-    with open("model.pkl", "rb") as f:
-        model = pkl.load(f)
-    with open("scaler.pkl", "rb") as f:
-        scaler = pkl.load(f)
-    with open("encoder.pkl", "rb") as f:
-        encoder = pkl.load(f)
-    with open("feature_names.pkl", "rb") as f:
-        feature_names = pkl.load(f)
-    return model, scaler, encoder, feature_names
-
-fitted_model, scaler, encoder, feature_names = load_all()
-
-# ===== Setup class dummy untuk prediksi =====
-model_obj = ModelXGB(data='Dataset_A_loan.csv', loaded_model=fitted_model)
-model_obj.scaler = scaler
-model_obj.encoder = encoder
-model_obj.feature_names = feature_names
-
-# Definisikan categorical dan numerical columns
-model_obj.cat_cols = [
-    'person_gender',
-    'person_education',
-    'person_home_ownership',
-    'loan_intent',
-    'previous_loan_defaults_on_file'
-]
-model_obj.num_cols = [
-    'person_age',
-    'person_income',
-    'person_emp_exp',
-    'loan_amnt',
-    'loan_int_rate',
-    'loan_percent_income',
-    'cb_person_cred_hist_length',
-    'credit_score'
-]
-
-# ===== Streamlit UI =====
-st.title("🔍 Prediksi Status Pinjaman")
-st.markdown("Masukkan data pemohon pinjaman untuk memprediksi statusnya.")
-
-# Form Input Pengguna
-input_data = {
-    'person_age': st.number_input("Umur", min_value=18, max_value=100, value=30),
-    'person_gender': st.selectbox("Jenis Kelamin", ['male', 'female']),
-    'person_education': st.selectbox("Pendidikan", ['High School', 'Bachelor', 'Master']),
-    'person_income': st.number_input("Pendapatan", value=50000.0),
-    'person_emp_exp': st.number_input("Pengalaman Kerja (tahun)", value=5),
-    'person_home_ownership': st.selectbox("Status Tempat Tinggal", ['RENT', 'OWN', 'MORTGAGE', 'OTHER']),
-    'loan_amnt': st.number_input("Jumlah Pinjaman", value=10000.0),
-    'loan_intent': st.selectbox("Tujuan Pinjaman", ['EDUCATION', 'MEDICAL', 'VENTURE', 'PERSONAL', 'DEBTCONSOLIDATION', 'HOMEIMPROVEMENT']),
-    'loan_int_rate': st.number_input("Bunga Pinjaman (%)", value=12.5),
-    'loan_percent_income': st.number_input("Persentase Pendapatan untuk Pinjaman", value=0.25),
-    'cb_person_cred_hist_length': st.number_input("Lama Histori Kredit", value=5),
-    'credit_score': st.number_input("Skor Kredit", value=650),
-    'previous_loan_defaults_on_file': st.selectbox("Pernah Gagal Bayar?", ['Yes', 'No'])
-}
-
-# Tombol Prediksi
-if st.button("Prediksi Status"):
-    user_df = pd.DataFrame([input_data])
-    label, probas = model_obj.predict_input(user_df)
-    label_map = {0: 'Default ❌', 1: 'Approved ✅'}
-
-    st.subheader("Hasil Prediksi:")
-    if label == 1:
-        st.success(f"{label_map[label]} dengan probabilitas {probas[label]*100:.2f}%")
-    else:
-        st.error(f"{label_map[label]} dengan probabilitas {probas[label]*100:.2f}%")
-
-    st.markdown("### Probabilitas:")
-    st.write({f"{label_map[i]}": f"{probas[i]*100:.2f}%" for i in range(len(probas))})
+def main():
+    st.title('Machine Leaning Loan Status Prediction App')
+    st.subheader('Name: Dennis Purnomo Yohaidi')
+    st.subheader('NIM: 2602354741')
+    st.info('This app will predict your obesity level!')
+    
+    with st.expander('**Data**'):
+        data = pd.read_csv('obesity-prediction-streamlit/ObesityDataSet_raw_and_data_sinthetic.csv')
+        st.write('This is a raw data')
+        st.dataframe(data)
+    
+    with st.expander('**Data Visualization**'):
+        st.scatter_chart(data, x='Height', y='Weight', color='NObeyesdad')
+    
+    gender_data = data['Gender'].unique()
+    gender = st.selectbox(
+        'What is your Gender?', 
+        gender_data,
+    )
+    
+    max_age = data['Age'].max()
+    age = st.slider("What is your Age?", 0, max_age)
+    
+    max_height = data['Height'].max()
+    height = st.slider("What is your Height?", 0.0, max_height)
+    
+    max_weight = data['Weight'].max()
+    weight = st.slider("What is your Weight?", 0.0, max_weight)
+    
+    family_history_data = data['family_history_with_overweight'].unique()
+    family_history = st.selectbox(
+        'Do you have a family history with overweight?', 
+        family_history_data,
+    )
+    
+    favc_data = data['FAVC'].unique()
+    favc = st.selectbox(
+        'Do you have FAVC (frequent consumption of high-caloric food)?', 
+        favc_data,
+    )
+    
+    max_fcvc = data['FCVC'].max()
+    fcvc = st.slider('What is your FCVC (frequency of consumption of vegetables)?', 0.0, max_fcvc)
+    
+    max_ncp = data['NCP'].max()
+    ncp = st.slider('What is your NCP (number of main meals)?', 0.0, max_ncp)
+    
+    caec_data = data['CAEC'].unique()
+    caec = st.selectbox(
+        'How often do you CAEC (consumption of food between meals)?', 
+        caec_data,
+    )
+    
+    smoke_data = data['SMOKE'].unique()
+    smoke = st.selectbox(
+        'Do you smoke?', 
+        smoke_data,
+    )
+    
+    max_ch2o = data['CH2O'].max()
+    ch2o = st.slider('What is your CH2O (consumption of water daily)?', 0.0, max_ch2o)
+    
+    scc_data = data['SCC'].unique()
+    scc = st.selectbox(
+        'Do you have SCC (squamous cell carcinoma)?', 
+        scc_data,
+    )
+    
+    max_faf = data['FAF'].max()
+    faf = st.slider('How often do you do FAF (Physical activity frequency)?', 0.0, max_faf)
+    
+    max_tue = data['TUE'].max()
+    tue = st.slider('How often do you do TUE?', 0.0, max_tue)
+    
+    calc_data = data['CALC'].unique()
+    calc = st.selectbox(
+        'How often do you do CALC (consumption of alcohol)?', 
+        calc_data,
+    )
+    
+    mtrans_data = data['MTRANS'].unique()
+    mtrans = st.selectbox(
+        'What is you main Transportation?',
+        mtrans_data,
+    )
+    
+    st.write('Data input by user')
+    user_data = pd.DataFrame([{
+        'Gender': gender,
+        'Age': age,
+        'Height': height,
+        'Weight': weight,
+        'family_history_with_overweight': family_history,
+        'FAVC': favc,
+        'FCVC': fcvc,
+        'NCP': ncp,
+        'CAEC': caec,
+        'SMOKE': smoke,
+        'CH2O': ch2o,
+        'SCC': scc,
+        'FAF': faf,
+        'TUE': tue,
+        'CALC': calc,
+        'MTRANS': mtrans
+        }])
+    st.dataframe(pd.DataFrame(user_data))
+    
+    st.write('Obesity Prediction')
+    processed_data = preprocess_data(data=user_data, encoder=loaded_encoder, scaler=loaded_scaler)
+    predictions = loaded_model.predict(processed_data)
+    print(predictions)
+    inverse_target_vals = {v: k for k, v in loaded_target_vals.items()}
+    prediction_probs = loaded_model.predict_proba(processed_data)
+    st.dataframe(pd.DataFrame(prediction_probs, columns=inverse_target_vals.values()))
+    st.write('The predicted output is: ', predictions[0], '**[', inverse_target_vals[predictions[0]] ,']**')
+    
+    st.header('🥳')
+    
+def preprocess_data(data, encoder, scaler):
+    data_encoded = pd.DataFrame(encoder.transform(data.select_dtypes(exclude=np.number)), columns=encoder.get_feature_names_out())
+    data_scaled = pd.DataFrame(scaler.transform(data.select_dtypes(include=np.number)), columns=data.select_dtypes(include=np.number).columns)
+    data = pd.concat([data_encoded, data_scaled], axis=1)
+    return data
+    
+if __name__ == '__main__':
+    main()
