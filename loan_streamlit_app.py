@@ -21,6 +21,47 @@ def main():
     st.subheader('Name: Dennis Purnomo Yohaidi')
     st.subheader('NIM: 2702354741')
     st.info('This app will predict your Loan Status!')
+    st.subheader('NIM: 2702354741')
+
+# Tampilkan test case
+accepted_case = {
+    'person_age': 35,
+    'person_gender': 'male',
+    'person_education': 'high school',
+    'person_income': 80000.0,
+    'person_emp_exp': 10,
+    'person_home_ownership': 'rent',
+    'loan_amnt': 5000.0,
+    'loan_intent': 'medical',
+    'loan_int_rate': 5.27,
+    'loan_percent_income': 0.06,
+    'cb_person_cred_hist_length': 14,
+    'credit_score': 700,
+    'previous_loan_defaults_on_file': 'no'
+}
+
+rejected_case = {
+    'person_age': 26,
+    'person_gender': 'female',
+    'person_education': 'college',
+    'person_income': 25000.0,
+    'person_emp_exp': 2,
+    'person_home_ownership': 'rent',
+    'loan_amnt': 10000.0,
+    'loan_intent': 'debt consolidation',
+    'loan_int_rate': 15.27,
+    'loan_percent_income': 0.4,
+    'cb_person_cred_hist_length': 3,
+    'credit_score': 510,
+    'previous_loan_defaults_on_file': 'yes'
+}
+
+st.markdown("### 🔵 Contoh Test Case Diterima")
+st.dataframe(pd.DataFrame([accepted_case]))
+
+st.markdown("### 🔴 Contoh Test Case Ditolak")
+st.dataframe(pd.DataFrame([rejected_case]))
+
 
     # Load data asli
     data = pd.read_csv('Dataset_A_loan.csv')
