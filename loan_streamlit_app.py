@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pickle as pkl
-from ModelXGB import ModelXGB  # asumsi class disimpan di file ModelXGB.py
+from utsmodeldeploymentoop import ModelXGB  # asumsi class disimpan di file ModelXGB.py
 
 # ===== Load all assets =====
 @st.cache_resource
