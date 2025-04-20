@@ -20,7 +20,7 @@ def main():
     st.title('Machine Learning Loan Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
     st.subheader('NIM: 2702354741')
-    st.info('This app will predict your Loan_Status!')
+    st.info('This app will predict your Loan Status!')
 
     # Load data asli
     data = pd.read_csv('Dataset_A_loan.csv')
@@ -30,7 +30,7 @@ def main():
     num_features = loaded_scaler.feature_names_in_
 
     # --- INPUT USER ---
-    age = st.number_input("Umur Anda:", 20, int(data['person_age'].max()))
+    age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
     gender = st.selectbox("Apa gender anda?:", sorted(clean_categories(data['person_gender'])))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
     income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
