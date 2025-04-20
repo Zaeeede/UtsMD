@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle as pkl
-from model_xgb import ModelXGB  # pastikan class ModelXGB disimpan di file ini
+import pickle as pkl  
 
 # Load objek-objek model dan preprocessing
 with open('model_xgb.pkl', 'rb') as file:
