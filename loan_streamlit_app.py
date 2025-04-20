@@ -105,9 +105,12 @@ def main():
     }])
 
     # Normalisasi input data kategorikal 
-    for col in cat_features:
-        if col in user_data.columns:
-            user_data[col] = user_data[col].astype(str).str.lower().str.strip()
+    user_data = user_data.astype(str)  # memastikan semua str dulu
+
+# Normalisasi person_gender sesuai OOP
+    if 'person_gender' in user_data.columns:
+        user_data['person_gender'] = user_data['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
+
 
     with st.expander('**Data yang Anda Masukkan**'):
         st.dataframe(user_data)
