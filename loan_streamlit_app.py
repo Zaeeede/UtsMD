@@ -5,7 +5,7 @@ import pickle as pkl
 from model_xgb import ModelXGB  # pastikan class ModelXGB disimpan di file ini
 
 # Load objek-objek model dan preprocessing
-with open('Loan_XGB_Model.pkl', 'rb') as file:
+with open('model_xgb.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
 with open('scaler.pkl', 'rb') as file:
