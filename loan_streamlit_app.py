@@ -29,7 +29,7 @@ def main():
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    # --- INPUT USER ---
+    # User Input
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
     gender = st.selectbox("Apa gender anda?:", sorted(clean_categories(data['person_gender'])))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
@@ -39,8 +39,8 @@ def main():
     loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()))
     loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()))
     loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
-    loan_percent_income = st.number_input("Persentase Pendapatan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
-    cb_length = st.number_input("Panjang Riwayat Kredit:", 0, int(data['cb_person_cred_hist_length'].max()))
+    loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
+    cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()))
     credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
     default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
 
@@ -61,7 +61,7 @@ def main():
         'previous_loan_defaults_on_file': default_history
     }])
 
-    # --- NORMALISASI INPUT KATEGORIKAL ---
+    # Normalisasi input data kategorikal 
     for col in cat_features:
         if col in user_data.columns:
             user_data[col] = user_data[col].astype(str).str.lower().str.strip()
@@ -69,7 +69,7 @@ def main():
     with st.expander('**Data yang Anda Masukkan**'):
         st.dataframe(user_data)
 
-    # --- PREDIKSI DENGAN TOMBOL ---
+    # kalkulasi prediksi dengan tombol
     if st.button("Prediksi"):
         with st.spinner("Sedang memproses prediksi..."):
             try:
@@ -85,7 +85,7 @@ def main():
             except Exception as e:
                 st.error(f"Terjadi kesalahan saat memproses data: {e}")
 
-# --- CLEAN KATEGORI ---
+# membersihkan kategori
 def clean_categories(series):
     return (
         series
@@ -96,7 +96,7 @@ def clean_categories(series):
         .unique()
     )
 
-# --- FUNGSI PREPROCESS ---
+# preprocessing
 def preprocess_data(data, encoder, scaler):
     try:
         # Normalisasi input kategorikal
@@ -134,6 +134,6 @@ def preprocess_data(data, encoder, scaler):
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
         st.stop()
 
-# --- MAIN APP ---
+# main
 if __name__ == '__main__':
     main()
