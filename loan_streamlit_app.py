@@ -1,82 +1,85 @@
 import streamlit as st
 import pandas as pd
 import pickle as pkl
-from utsmodeldeploymentoop import ModelXGB  # class sudah dibuat
+import numpy as np
+from utsmodeldeploymentoop import ModelXGB
 
-# ===== Load all assets =====
-@st.cache_resource
-def load_all():
-    with open("model.pkl", "rb") as f:
-        model = pkl.load(f)
-    with open("scaler.pkl", "rb") as f:
-        scaler = pkl.load(f)
-    with open("encoder.pkl", "rb") as f:
-        encoder = pkl.load(f)
-    with open("feature_names.pkl", "rb") as f:
-        feature_names = pkl.load(f)
-    return model, scaler, encoder, feature_names
+# Load semua komponen yang sudah disimpan
+with open('model_xgb.pkl', 'rb') as file:
+    loaded_model = pkl.load(file)
 
-fitted_model, scaler, encoder, feature_names = load_all()
+with open('scaler.pkl', 'rb') as file:
+    loaded_scaler = pkl.load(file)
 
-# ===== Setup class dummy for prediction only =====
-# NOTE: Kita tidak perlu memanggil data_split atau data_preprocessing lagi di sini
-model_obj = ModelXGB(data='Dataset_A_loan.csv', loaded_model=fitted_model)
-model_obj.feature_names = feature_names
+with open('encoder.pkl', 'rb') as file:
+    loaded_encoder = pkl.load(file)
 
-# Kita definisikan categorical dan numerical columns secara eksplisit
-model_obj.cat_cols = [
-    'person_gender',
-    'person_education',
-    'person_home_ownership',
-    'loan_intent',
-    'previous_loan_defaults_on_file'
-]
-model_obj.num_cols = [
-    'person_age',
-    'person_income',
-    'person_emp_exp',
-    'loan_amnt',
-    'loan_int_rate',
-    'loan_percent_income',
-    'cb_person_cred_hist_length',
-    'credit_score'
-]
+with open('feature_names.pkl', 'rb') as file:
+    loaded_feature_names = pkl.load(file)
 
-model_obj.scaler = scaler
-model_obj.encoder = encoder
+with open('target_vals.pkl', 'rb') as file:
+    loaded_target_vals = pkl.load(file)
 
-# ===== Streamlit UI =====
-st.title("🔍 Prediksi Status Pinjaman")
-st.markdown("Masukkan data pemohon pinjaman untuk memprediksi statusnya.")
+inverse_target_vals = {v: k for k, v in loaded_target_vals.items()}
 
-# ===== Form Input dari Pengguna =====
-input_data = {
-    'person_age': st.number_input("Umur", min_value=18, max_value=100, value=30),
-    'person_gender': st.selectbox("Jenis Kelamin", ['male', 'female']),
-    'person_education': st.selectbox("Pendidikan", ['High School', 'Bachelor', 'Master']),
-    'person_income': st.number_input("Pendapatan", value=50000.0),
-    'person_emp_exp': st.number_input("Pengalaman Kerja (tahun)", value=5),
-    'person_home_ownership': st.selectbox("Status Tempat Tinggal", ['RENT', 'OWN', 'MORTGAGE', 'OTHER']),
-    'loan_amnt': st.number_input("Jumlah Pinjaman", value=10000.0),
-    'loan_intent': st.selectbox("Tujuan Pinjaman", ['EDUCATION', 'MEDICAL', 'VENTURE', 'PERSONAL', 'DEBTCONSOLIDATION', 'HOMEIMPROVEMENT']),
-    'loan_int_rate': st.number_input("Bunga Pinjaman (%)", value=12.5),
-    'loan_percent_income': st.number_input("Persentase Pendapatan untuk Pinjaman", value=0.25),
-    'cb_person_cred_hist_length': st.number_input("Lama Histori Kredit", value=5),
-    'credit_score': st.number_input("Skor Kredit", value=650),
-    'previous_loan_defaults_on_file': st.selectbox("Pernah Gagal Bayar?", ['Yes', 'No'])
-}
+# Inisialisasi class ModelXGB
+model = ModelXGB(data='Dataset_A_loan.csv', loaded_model=loaded_model)
+model.data_split(target_column='loan_status')
+model.data_preprocessing(loaded_scaler, loaded_encoder, load_from_pickle=True)
+model.feature_names = loaded_feature_names
 
-# Jika tombol ditekan
-if st.button("Prediksi Status"):
-    user_df = pd.DataFrame([input_data])
-    label, probas = model_obj.predict_input(user_df)
-    label_map = {0: 'Default ❌', 1: 'Approved ✅'}
+def main():
+    st.title('🎯 Loan Status Prediction App')
+    st.subheader('Name: Benjamin Eleazar Manafe')
+    st.subheader('NIM: 2702340704')
+    st.info('This app will predict your loan approval status!')
 
-    st.subheader("Hasil Prediksi:")
-    if label == 1:
-        st.success(f"{label_map[label]} dengan probabilitas {probas[label]*100:.2f}%")
-    else:
-        st.error(f"{label_map[label]} dengan probabilitas {probas[label]*100:.2f}%")
+    with st.expander('📊 Dataset Preview'):
+        data = pd.read_csv('Dataset_A_loan.csv')
+        st.dataframe(data)
 
-    st.markdown("### Probabilitas:")
-    st.write({f"{label_map[i]}": f"{probas[i]*100:.2f}%" for i in range(len(probas))})
+    st.header('📝 Input Your Loan Application Data')
+
+    # Input user
+    person_age = st.slider('Age', 18, 100, 25)
+    person_gender = st.selectbox('Gender', ['male', 'female'])
+    person_education = st.selectbox('Education', ['High School', 'College', 'Bachelor', 'Master'])
+    person_income = st.number_input('Annual Income', min_value=0.0, value=50000.0)
+    person_emp_exp = st.slider('Employment Experience (Years)', 0, 40, 2)
+    person_home_ownership = st.selectbox('Home Ownership', ['RENT', 'OWN', 'MORTGAGE', 'OTHER'])
+    loan_amnt = st.number_input('Loan Amount', min_value=0.0, value=10000.0)
+    loan_intent = st.selectbox('Loan Intent', ['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE', 'HOMEIMPROVEMENT', 'DEBTCONSOLIDATION'])
+    loan_int_rate = st.slider('Interest Rate (%)', 0.0, 40.0, 13.5)
+    loan_percent_income = st.slider('Loan Percent Income', 0.0, 1.0, 0.3)
+    cb_person_cred_hist_length = st.slider('Credit History Length (Years)', 1, 50, 5)
+    credit_score = st.slider('Credit Score', 300, 850, 600)
+    previous_loan_defaults_on_file = st.selectbox('Previous Loan Default on File', ['Yes', 'No'])
+
+    input_data = pd.DataFrame([{
+        'person_age': person_age,
+        'person_gender': person_gender,
+        'person_education': person_education,
+        'person_income': person_income,
+        'person_emp_exp': person_emp_exp,
+        'person_home_ownership': person_home_ownership,
+        'loan_amnt': loan_amnt,
+        'loan_intent': loan_intent,
+        'loan_int_rate': loan_int_rate,
+        'loan_percent_income': loan_percent_income,
+        'cb_person_cred_hist_length': cb_person_cred_hist_length,
+        'credit_score': credit_score,
+        'previous_loan_defaults_on_file': previous_loan_defaults_on_file
+    }])
+
+    st.write('### 🔍 Input Data Preview')
+    st.dataframe(input_data)
+
+    if st.button('Predict Loan Status'):
+        label, probas = model.predict_input(input_data)
+        st.success(f"🎯 Predicted Loan Status: **{inverse_target_vals[label]}**")
+        st.write("### 📊 Probability per Class:")
+        prob_df = pd.DataFrame([probas], columns=[inverse_target_vals[i] for i in range(len(probas))])
+        st.dataframe(prob_df)
+
+if __name__ == '__main__':
+    main()
