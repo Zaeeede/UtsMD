@@ -29,20 +29,78 @@ def main():
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    # User Input
-    age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
-    gender = st.selectbox("Apa gender anda?:", sorted(clean_categories(data['person_gender'])))
-    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
-    income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
-    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
-    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
-    loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()))
-    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()))
-    loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
-    loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
-    cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()))
-    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
-    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
+    # Default Input
+    default_input = {
+        'person_age': 30,
+        'person_gender': 'male',
+        'person_education': 'college',
+        'person_income': 50000.0,
+        'person_emp_exp': 5,
+        'person_home_ownership': 'rent',
+        'loan_amnt': 8000.0,
+        'loan_intent': 'medical',
+        'loan_int_rate': 10.5,
+        'loan_percent_income': 0.15,
+        'cb_person_cred_hist_length': 6,
+        'credit_score': 650,
+        'previous_loan_defaults_on_file': 'n'
+    }
+
+    # Tombol Test Case
+    if st.button("🔵 Gunakan Test Case Diterima"):
+        default_input = {
+            'person_age': 35,
+            'person_gender': 'male',
+            'person_education': 'high school',
+            'person_income': 80000.0,
+            'person_emp_exp': 10,
+            'person_home_ownership': 'rent',
+            'loan_amnt': 5000.0,
+            'loan_intent': 'medical',
+            'loan_int_rate': 5.27,
+            'loan_percent_income': 0.06,
+            'cb_person_cred_hist_length': 14,
+            'credit_score': 700,
+            'previous_loan_defaults_on_file': 'n'
+        }
+
+    if st.button("🔴 Gunakan Test Case Ditolak"):
+        default_input = {
+            'person_age': 26,
+            'person_gender': 'female',
+            'person_education': 'college',
+            'person_income': 25000.0,
+            'person_emp_exp': 2,
+            'person_home_ownership': 'rent',
+            'loan_amnt': 10000.0,
+            'loan_intent': 'debt consolidation',
+            'loan_int_rate': 15.27,
+            'loan_percent_income': 0.4,
+            'cb_person_cred_hist_length': 3,
+            'credit_score': 510,
+            'previous_loan_defaults_on_file': 'y'
+        }
+
+    # Input User
+    gender_options = sorted(clean_categories(data['person_gender']))
+    education_options = sorted(data['person_education'].dropna().unique())
+    home_options = sorted(data['person_home_ownership'].dropna().unique())
+    intent_options = sorted(data['loan_intent'].dropna().unique())
+    default_options = sorted(data['previous_loan_defaults_on_file'].dropna().unique())
+
+    age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()), value=int(default_input['person_age']))
+    gender = st.selectbox("Apa gender anda?:", gender_options, index=gender_options.index(default_input['person_gender']))
+    education = st.selectbox("Pendidikan Terakhir:", education_options, index=education_options.index(default_input['person_education']))
+    income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()), value=float(default_input['person_income']))
+    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()), value=int(default_input['person_emp_exp']))
+    home_ownership = st.selectbox("Kepemilikan Rumah:", home_options, index=home_options.index(default_input['person_home_ownership']))
+    loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()), value=float(default_input['loan_amnt']))
+    loan_intent = st.selectbox("Tujuan Pinjaman:", intent_options, index=intent_options.index(default_input['loan_intent']))
+    loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()), value=float(default_input['loan_int_rate']))
+    loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()), value=float(default_input['loan_percent_income']))
+    cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()), value=int(default_input['cb_person_cred_hist_length']))
+    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()), value=int(default_input['credit_score']))
+    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", default_options, index=default_options.index(default_input['previous_loan_defaults_on_file']))
 
     # Buat DataFrame dari input user
     user_data = pd.DataFrame([{
@@ -61,7 +119,7 @@ def main():
         'previous_loan_defaults_on_file': default_history
     }])
 
-    # Normalisasi input data kategorikal 
+    # Normalisasi input kategorikal
     for col in cat_features:
         if col in user_data.columns:
             user_data[col] = user_data[col].astype(str).str.lower().str.strip()
@@ -69,7 +127,7 @@ def main():
     with st.expander('**Data yang Anda Masukkan**'):
         st.dataframe(user_data)
 
-    # kalkulasi prediksi dengan tombol
+    # Prediksi
     if st.button("Prediksi"):
         with st.spinner("Sedang memproses prediksi..."):
             try:
@@ -85,7 +143,7 @@ def main():
             except Exception as e:
                 st.error(f"Terjadi kesalahan saat memproses data: {e}")
 
-# membersihkan kategori
+# Fungsi bantu
 def clean_categories(series):
     return (
         series
@@ -96,18 +154,14 @@ def clean_categories(series):
         .unique()
     )
 
-# preprocessing
 def preprocess_data(data, encoder, scaler):
     try:
-        # Normalisasi input kategorikal
         for col in encoder.feature_names_in_:
             data[col] = data[col].str.lower().str.strip()
 
-        # Split kolom
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
 
-        # Transformasi data
         data_encoded = pd.DataFrame(
             encoder.transform(data[cat_cols]),
             columns=encoder.get_feature_names_out(),
@@ -119,10 +173,8 @@ def preprocess_data(data, encoder, scaler):
             index=data.index
         )
 
-        # Gabung hasil transform
         all_features = pd.concat([data_encoded, data_scaled], axis=1)
 
-        # Pastikan urutan kolom sesuai dengan model
         model_features = loaded_model.get_booster().feature_names
         missing = set(model_features) - set(all_features.columns)
         if missing:
@@ -134,6 +186,6 @@ def preprocess_data(data, encoder, scaler):
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
         st.stop()
 
-# main
+# Run
 if __name__ == '__main__':
     main()
