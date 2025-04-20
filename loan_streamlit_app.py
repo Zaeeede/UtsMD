@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pickle as pkl
-from utsmodeldeploymentoop import ModelXGB  # asumsi class disimpan di file ModelXGB.py
+from utsmodeldeploymentoop import ModelXGB  # class sudah dibuat
 
 # ===== Load all assets =====
 @st.cache_resource
@@ -14,19 +14,39 @@ def load_all():
         encoder = pkl.load(f)
     with open("feature_names.pkl", "rb") as f:
         feature_names = pkl.load(f)
-
     return model, scaler, encoder, feature_names
 
 fitted_model, scaler, encoder, feature_names = load_all()
 
 # ===== Setup class dummy for prediction only =====
+# NOTE: Kita tidak perlu memanggil data_split atau data_preprocessing lagi di sini
 model_obj = ModelXGB(data='Dataset_A_loan.csv', loaded_model=fitted_model)
-model_obj.data_split(target_column='loan_status')
-model_obj.data_preprocessing(scaler, encoder, load_from_pickle=True)
-model_obj.feature_names = feature_names  # load dari pickle
+model_obj.feature_names = feature_names
+
+# Kita definisikan categorical dan numerical columns secara eksplisit
+model_obj.cat_cols = [
+    'person_gender',
+    'person_education',
+    'person_home_ownership',
+    'loan_intent',
+    'previous_loan_defaults_on_file'
+]
+model_obj.num_cols = [
+    'person_age',
+    'person_income',
+    'person_emp_exp',
+    'loan_amnt',
+    'loan_int_rate',
+    'loan_percent_income',
+    'cb_person_cred_hist_length',
+    'credit_score'
+]
+
+model_obj.scaler = scaler
+model_obj.encoder = encoder
 
 # ===== Streamlit UI =====
-st.title("Prediksi Status Pinjaman")
+st.title("🔍 Prediksi Status Pinjaman")
 st.markdown("Masukkan data pemohon pinjaman untuk memprediksi statusnya.")
 
 # ===== Form Input dari Pengguna =====
