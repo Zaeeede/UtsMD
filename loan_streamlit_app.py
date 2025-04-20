@@ -56,11 +56,11 @@ rejected_case = {
     'previous_loan_defaults_on_file': 'yes'
 }
 
-st.markdown("### 🔵 Contoh Test Case Diterima")
-st.dataframe(pd.DataFrame([accepted_case]))
+    st.markdown("### 🔵 Contoh Test Case Diterima")
+    st.dataframe(pd.DataFrame([accepted_case]))
 
-st.markdown("### 🔴 Contoh Test Case Ditolak")
-st.dataframe(pd.DataFrame([rejected_case]))
+    st.markdown("### 🔴 Contoh Test Case Ditolak")
+    st.dataframe(pd.DataFrame([rejected_case]))
 
 
     # Load data asli
