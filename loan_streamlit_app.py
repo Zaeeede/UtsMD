@@ -16,20 +16,64 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
+def clean_categories(series):
+    return (
+        series
+        .dropna()
+        .astype(str)
+        .str.lower()
+        .str.replace(' ', '')
+        .unique()
+    )
+
+def preprocess_data(data, encoder, scaler):
+    try:
+        for col in encoder.feature_names_in_:
+            data[col] = data[col].str.lower().str.strip()
+
+        cat_cols = encoder.feature_names_in_
+        num_cols = scaler.feature_names_in_
+
+        data_encoded = pd.DataFrame(
+            encoder.transform(data[cat_cols]),
+            columns=encoder.get_feature_names_out(),
+            index=data.index
+        )
+        data_scaled = pd.DataFrame(
+            scaler.transform(data[num_cols]),
+            columns=num_cols,
+            index=data.index
+        )
+
+        all_features = pd.concat([data_encoded, data_scaled], axis=1)
+
+        model_features = loaded_model.get_booster().feature_names
+        missing = set(model_features) - set(all_features.columns)
+        if missing:
+            raise ValueError(f"Data yang diproses tidak memiliki fitur: {missing}")
+
+        return all_features[model_features]
+
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
+        st.stop()
+
 def main():
     st.title('Machine Learning Loan Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
     st.subheader('NIM: 2702354741')
     st.info('This app will predict your Loan Status!')
 
-    # Load data asli
-    data = pd.read_csv('Dataset_A_loan.csv')
-    
-    # Ambil kategori dari encoder agar sinkron
+    try:
+        data = pd.read_csv('Dataset_A_loan.csv')
+    except FileNotFoundError:
+        st.error("File Dataset_A_loan.csv tidak ditemukan!")
+        return
+
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    # User Input
+    # Input pengguna
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
     gender = st.selectbox("Apa gender anda?:", sorted(clean_categories(data['person_gender'])))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
@@ -44,7 +88,6 @@ def main():
     credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
     default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
 
-    # Buat DataFrame dari input user
     user_data = pd.DataFrame([{
         'person_age': age,
         'person_gender': gender,
@@ -61,7 +104,6 @@ def main():
         'previous_loan_defaults_on_file': default_history
     }])
 
-    # Normalisasi input data kategorikal 
     for col in cat_features:
         if col in user_data.columns:
             user_data[col] = user_data[col].astype(str).str.lower().str.strip()
@@ -69,7 +111,6 @@ def main():
     with st.expander('*Data yang Anda Masukkan*'):
         st.dataframe(user_data)
 
-    # kalkulasi prediksi dengan tombol
     if st.button("Prediksi"):
         with st.spinner("Sedang memproses prediksi..."):
             try:
@@ -85,55 +126,5 @@ def main():
             except Exception as e:
                 st.error(f"Terjadi kesalahan saat memproses data: {e}")
 
-# membersihkan kategori
-def clean_categories(series):
-    return (
-        series
-        .dropna()
-        .astype(str)
-        .str.lower()
-        .str.replace(' ', '')
-        .unique()
-    )
-
-# preprocessing
-def preprocess_data(data, encoder, scaler):
-    try:
-        # Normalisasi input kategorikal
-        for col in encoder.feature_names_in_:
-            data[col] = data[col].str.lower().str.strip()
-
-        # Split kolom
-        cat_cols = encoder.feature_names_in_
-        num_cols = scaler.feature_names_in_
-
-        # Transformasi data
-        data_encoded = pd.DataFrame(
-            encoder.transform(data[cat_cols]),
-            columns=encoder.get_feature_names_out(),
-            index=data.index
-        )
-        data_scaled = pd.DataFrame(
-            scaler.transform(data[num_cols]),
-            columns=num_cols,
-            index=data.index
-        )
-
-        # Gabung hasil transform
-        all_features = pd.concat([data_encoded, data_scaled], axis=1)
-
-        # Pastikan urutan kolom sesuai dengan model
-        model_features = loaded_model.get_booster().feature_names
-        missing = set(model_features) - set(all_features.columns)
-        if missing:
-            raise ValueError(f"Data yang diproses tidak memiliki fitur: {missing}")
-
-        return all_features[model_features]
-
-    except Exception as e:
-        st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
-        st.stop()
-
-# main
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()
