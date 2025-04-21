@@ -162,4 +162,4 @@ def main():
         st.dataframe(user_data)
 
     if st.button("Prediksi"):
-        with st.spinner
+        with st.spinner:
