@@ -162,4 +162,18 @@ def main():
         st.dataframe(user_data)
 
     if st.button("Prediksi"):
-        with st.spinner:
+        with st.spinner("Sedang memproses prediksi..."):
+            try:
+                processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
+                prediction = loaded_model.predict(processed_data)[0]
+                prediction_probs = loaded_model.predict_proba(processed_data)
+
+                pred_label = loaded_target_vals[prediction] if prediction in loaded_target_vals else str(prediction)
+                prob = prediction_probs[0][prediction] * 100
+
+                st.success(f"Prediksi Loan Status: {pred_label} ({prob:.2f}%)")
+            except Exception as e:
+                st.error(f"Terjadi kesalahan saat memproses data: {e}")
+
+if __name__ == '__main__':
+    main()
