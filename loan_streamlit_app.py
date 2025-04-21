@@ -113,7 +113,7 @@ def main():
         if st.button("❌ Test Case: Rejected"):
             st.session_state.update({
                 'person_age': 21,
-                'person_gender': 'female',
+                'person_gender': 'male',
                 'person_education': 'High School',
                 'person_income': 12282.0,
                 'person_emp_exp': 0,
