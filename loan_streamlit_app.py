@@ -78,8 +78,11 @@ def main():
         st.error("File Dataset_A_loan.csv tidak ditemukan!")
         return
 
-    # Ensure the max value for income is a valid number
-    max_income = float(data['person_income'].max()) if pd.api.types.is_numeric_dtype(data['person_income']) else 20000
+    # Handle non-numeric or missing values for 'person_income'
+    max_income = 20000  # Default max value
+
+    if pd.api.types.is_numeric_dtype(data['person_income']):
+        max_income = float(data['person_income'].max())  # Update max_income to max value if it's numeric
 
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
@@ -92,7 +95,7 @@ def main():
         "Pendapatan Tahunan:",
         min_value=0.0,
         max_value=max_income,
-        value=st.session_state.get('person_income', 20000)
+        value=st.session_state.get('person_income', 20000)  # Default value for income
     )
     emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
     home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
