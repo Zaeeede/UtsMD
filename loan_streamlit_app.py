@@ -99,7 +99,7 @@ def main():
                 'person_education': 'Master',
                 'person_income': 71948.0,
                 'person_emp_exp': 0,
-                'person_home_ownership': 'RENT',
+                'person_home_ownership': 'RENT',  # Pastikan ini konsisten dengan data asli
                 'loan_amnt': 35000.0,
                 'loan_intent': 'PERSONAL',
                 'loan_int_rate': 16.02,
@@ -117,7 +117,7 @@ def main():
                 'person_education': 'High School',
                 'person_income': 12282.0,
                 'person_emp_exp': 0,
-                'person_home_ownership': 'OWN',
+                'person_home_ownership': 'OWN',  # Pastikan ini konsisten dengan data asli
                 'loan_amnt': 1000.0,
                 'loan_intent': 'EDUCATION',
                 'loan_int_rate': 11.14,
