@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-# === Fungsi tambahan seperti pada OOP ===
+# === Fungsi tambahan ===
 def medianval(df, col):
     return np.median(df[col].dropna())
 
@@ -13,11 +13,10 @@ def fillingnawithmedian(df, col):
     return df
 
 def correct_values(df):
-    # Hanya memperbaiki nilai pada kolom 'person_gender'
     df['person_gender'] = df['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
     return df
 
-# === Load model dan tools preprocessing ===
+# === Load model dan preprocessing tools ===
 with open('model_xgb.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
@@ -30,13 +29,13 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
-# === Preprocessing Function ===
+# === Fungsi Preprocessing ===
 def preprocess_data(data, encoder, scaler):
     try:
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
 
-        data = correct_values(data)  # Memperbaiki gender tanpa normalisasi kolom kategorikal lainnya
+        data = correct_values(data)
 
         for col in num_cols:
             data = fillingnawithmedian(data, col)
@@ -81,16 +80,15 @@ def main():
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    # Menentukan nilai max yang valid untuk setiap inputan
+    # Nilai maksimum input
     max_income = float(data['person_income'].max()) if isinstance(data['person_income'].max(), (int, float)) else 100000.0
     max_age = int(data['person_age'].max()) if isinstance(data['person_age'].max(), (int, float)) else 100
     max_emp_exp = int(data['person_emp_exp'].max()) if isinstance(data['person_emp_exp'].max(), (int, float)) else 50
     max_loan_amnt = float(data['loan_amnt'].max()) if isinstance(data['loan_amnt'].max(), (int, float)) else 1000000.0
     max_credit_score = int(data['credit_score'].max()) if isinstance(data['credit_score'].max(), (int, float)) else 850
 
-    # Menambahkan tombol untuk tes case
+    # Tombol Test Case
     col1, col2 = st.columns(2)
-    
     with col1:
         if st.button("✅ Test Case: Approved"):
             st.session_state.update({
@@ -108,7 +106,6 @@ def main():
                 'credit_score': 561,
                 'previous_loan_defaults_on_file': 'No'
             })
-
     with col2:
         if st.button("❌ Test Case: Rejected"):
             st.session_state.update({
@@ -127,15 +124,10 @@ def main():
                 'previous_loan_defaults_on_file': 'Yes'
             })
 
-    # Form input user
-    # === Bagian Form input user ===
+    # Input Form
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, max_age, value=st.session_state.get('person_age', 40))
-
-# Hanya menampilkan opsi 'male' dan 'female'
     gender_options = ['male', 'female']
-    default_gender = st.session_state.get('person_gender', 'female')
-    gender = st.selectbox("Apa gender anda?:", gender_options, index=gender_options.index(default_gender) if default_gender in gender_options else 0)
-
+    gender = st.selectbox("Apa gender anda?:", gender_options, index=gender_options.index(st.session_state.get('person_gender', 'female')))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()), index=sorted(data['person_education'].dropna().unique()).index(st.session_state.get('person_education', 'Master')))
     income = st.number_input("Pendapatan Tahunan:", 0.0, max_income, value=st.session_state.get('person_income', 30000.0))
     emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, max_emp_exp, value=st.session_state.get('person_emp_exp', 5))
@@ -167,22 +159,32 @@ def main():
     with st.expander('Data yang Anda Masukkan'):
         st.dataframe(user_data)
 
-    if st.button("Prediksi"):
-        with st.spinner("Sedang memproses prediksi..."):
-            try:
-                processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
-                prediction = loaded_model.predict(processed_data)[0]
-                prediction_probs = loaded_model.predict_proba(processed_data)
+    col3, col4 = st.columns([1, 1])
+    with col3:
+        if st.button("Prediksi"):
+            with st.spinner("Sedang memproses prediksi..."):
+                try:
+                    processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
+                    prediction = loaded_model.predict(processed_data)[0]
+                    prediction_probs = loaded_model.predict_proba(processed_data)
+                    label_mapping = {0: "Ditolak", 1: "Diterima"}
+                    pred_label = label_mapping.get(prediction, str(prediction))
+                    prob = prediction_probs[0][prediction] * 100
+                    st.success(f"Hasil Prediksi: **{pred_label}** ({prob:.2f}%)")
+                except Exception as e:
+                    st.error(f"Terjadi kesalahan saat memproses data: {e}")
 
-            # Mapping prediksi ke label
-                label_mapping = {0: "Ditolak", 1: "Diterima"}
-                pred_label = label_mapping.get(prediction, str(prediction))
-                prob = prediction_probs[0][prediction] * 100
-
-                st.success(f"Hasil Prediksi: **{pred_label}** ({prob:.2f}%)")
-            except Exception as e:
-                st.error(f"Terjadi kesalahan saat memproses data: {e}")
-
+    with col4:
+        if st.button("🔄 Reset"):
+            for key in [
+                'person_age', 'person_gender', 'person_education', 'person_income', 'person_emp_exp',
+                'person_home_ownership', 'loan_amnt', 'loan_intent', 'loan_int_rate',
+                'loan_percent_income', 'cb_person_cred_hist_length', 'credit_score',
+                'previous_loan_defaults_on_file'
+            ]:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.experimental_rerun()
 
 if __name__ == '__main__':
     main()
