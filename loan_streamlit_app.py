@@ -112,18 +112,18 @@ def main():
     with col2:
         if st.button("❌ Test Case: Rejected"):
             st.session_state.update({
-                'person_age': 22,
+                'person_age': 21,
                 'person_gender': 'female',
                 'person_education': 'High School',
-                'person_income': 15000.0,
-                'person_emp_exp': 1,
-                'person_home_ownership': 'RENT',
-                'loan_amnt': 30000.0,
-                'loan_intent': 'DEBTCONSOLIDATION',
-                'loan_int_rate': 19.5,
-                'loan_percent_income': 0.5,
-                'cb_person_cred_hist_length': 1,
-                'credit_score': 470,
+                'person_income': 12282.0,
+                'person_emp_exp': 0,
+                'person_home_ownership': 'OWN',
+                'loan_amnt': 1000.0,
+                'loan_intent': 'EDUCATION',
+                'loan_int_rate': 11.14,
+                'loan_percent_income': 0.08,
+                'cb_person_cred_hist_length': 2,
+                'credit_score': 504,
                 'previous_loan_defaults_on_file': 'Yes'
             })
 
