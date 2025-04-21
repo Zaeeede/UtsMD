@@ -168,12 +168,15 @@ def main():
                 prediction = loaded_model.predict(processed_data)[0]
                 prediction_probs = loaded_model.predict_proba(processed_data)
 
-                pred_label = loaded_target_vals[prediction] if prediction in loaded_target_vals else str(prediction)
+            # Mapping prediksi ke label
+                label_mapping = {0: "Ditolak", 1: "Diterima"}
+                pred_label = label_mapping.get(prediction, str(prediction))
                 prob = prediction_probs[0][prediction] * 100
 
-                st.success(f"Prediksi Loan Status: {pred_label} ({prob:.2f}%)")
+                st.success(f"Hasil Prediksi: **{pred_label}** ({prob:.2f}%)")
             except Exception as e:
                 st.error(f"Terjadi kesalahan saat memproses data: {e}")
+
 
 if __name__ == '__main__':
     main()
