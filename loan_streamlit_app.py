@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-# Fungsi tambahan untuk preprocessing
+# === Fungsi tambahan seperti pada OOP ===
 def medianval(df, col):
     return np.median(df[col].dropna())
 
@@ -13,11 +13,11 @@ def fillingnawithmedian(df, col):
     return df
 
 def correct_values(df):
-    # Memperbaiki nilai pada kolom 'person_gender'
+    # Hanya memperbaiki nilai pada kolom 'person_gender'
     df['person_gender'] = df['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
     return df
 
-# Load model dan tools preprocessing
+# === Load model dan tools preprocessing ===
 with open('model_xgb.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
@@ -30,7 +30,7 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
-# Fungsi untuk preprocessing data
+# === Preprocessing Function ===
 def preprocess_data(data, encoder, scaler):
     try:
         cat_cols = encoder.feature_names_in_
@@ -65,7 +65,7 @@ def preprocess_data(data, encoder, scaler):
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
         st.stop()
 
-# Streamlit App
+# === Streamlit App ===
 def main():
     st.title('Machine Learning Loan Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
@@ -78,27 +78,13 @@ def main():
         st.error("File Dataset_A_loan.csv tidak ditemukan!")
         return
 
-    # Handle non-numeric or missing values for 'person_income'
-    if pd.api.types.is_numeric_dtype(data['person_income']):
-        max_income = data['person_income'].max()
-        min_income = data['person_income'].min()
-    else:
-        max_income = 20000  # Default max value if person_income is not numeric
-        min_income = 0  # Default min value
-
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    # Form for user input
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
     gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
-    income = st.number_input(
-        "Pendapatan Tahunan:",
-        min_value=min_income,
-        max_value=max_income,
-        value=st.session_state.get('person_income', 20000)  # Default value for income
-    )
+    income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
     emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
     home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
     loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()))
@@ -109,7 +95,6 @@ def main():
     credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
     default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
 
-    # Store user input into session state
     user_data = pd.DataFrame([{
         'person_age': age,
         'person_gender': gender,
@@ -126,10 +111,10 @@ def main():
         'previous_loan_defaults_on_file': default_history
     }])
 
-    with st.expander('*Data yang Anda Masukkan*'):
+    with st.expander('Data yang Anda Masukkan'):
         st.dataframe(user_data)
 
-    # Test cases for Rejected and Approved
+    # Test Case Buttons
     col1, col2 = st.columns(2)
 
     if col1.button("✅ Test Case: Approved"):
@@ -177,7 +162,7 @@ def main():
                 pred_label = "Ditolak" if prediction == 0 else "Diterima"
                 prob = prediction_probs[0][prediction] * 100
 
-                st.success(f"*Prediksi Loan Status: {pred_label} ({prob:.2f}%)*")
+                st.success(f"Prediksi Loan Status: {pred_label} ({prob:.2f}%)")
 
             except Exception as e:
                 st.error(f"Terjadi kesalahan saat memproses data: {e}")
