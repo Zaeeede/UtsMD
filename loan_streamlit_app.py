@@ -99,7 +99,7 @@ def main():
                 'person_education': 'Master',
                 'person_income': 71948.0,
                 'person_emp_exp': 0,
-                'person_home_ownership': 'RENT',  # Pastikan ini konsisten dengan data asli
+                'person_home_ownership': 'RENT',
                 'loan_amnt': 35000.0,
                 'loan_intent': 'PERSONAL',
                 'loan_int_rate': 16.02,
@@ -117,7 +117,7 @@ def main():
                 'person_education': 'High School',
                 'person_income': 12282.0,
                 'person_emp_exp': 0,
-                'person_home_ownership': 'OWN',  # Pastikan ini konsisten dengan data asli
+                'person_home_ownership': 'OWN',
                 'loan_amnt': 1000.0,
                 'loan_intent': 'EDUCATION',
                 'loan_int_rate': 11.14,
@@ -129,18 +129,18 @@ def main():
 
     # Form input user
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, max_age, value=st.session_state.get('person_age', 40))
-    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()))
-    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
+    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()), index=sorted(data['person_gender'].dropna().unique()).index(st.session_state.get('person_gender', 'female')))
+    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()), index=sorted(data['person_education'].dropna().unique()).index(st.session_state.get('person_education', 'Master')))
     income = st.number_input("Pendapatan Tahunan:", 0.0, max_income, value=st.session_state.get('person_income', 30000.0))
     emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, max_emp_exp, value=st.session_state.get('person_emp_exp', 5))
-    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
+    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()), index=sorted(data['person_home_ownership'].dropna().unique()).index(st.session_state.get('person_home_ownership', 'RENT')))
     loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, max_loan_amnt, value=st.session_state.get('loan_amnt', 10000.0))
-    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()))
+    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()), index=sorted(data['loan_intent'].dropna().unique()).index(st.session_state.get('loan_intent', 'PERSONAL')))
     loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()), value=st.session_state.get('loan_int_rate', 10.0))
     loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()), value=st.session_state.get('loan_percent_income', 0.1))
     cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()), value=st.session_state.get('cb_person_cred_hist_length', 5))
     credit_score = st.slider("Skor Kredit:", 0, max_credit_score, value=st.session_state.get('credit_score', 700))
-    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
+    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()), index=sorted(data['previous_loan_defaults_on_file'].dropna().unique()).index(st.session_state.get('previous_loan_defaults_on_file', 'No')))
 
     user_data = pd.DataFrame([{
         'person_age': age,
@@ -162,19 +162,4 @@ def main():
         st.dataframe(user_data)
 
     if st.button("Prediksi"):
-        with st.spinner("Sedang memproses prediksi..."):
-            try:
-                processed_data = preprocess_data(user_data, loaded_encoder, loaded_scaler)
-                prediction = loaded_model.predict(processed_data)[0]
-                prediction_probs = loaded_model.predict_proba(processed_data)
-
-                pred_label = "Ditolak" if prediction == 0 else "Diterima"
-                prob = prediction_probs[0][prediction] * 100
-
-                st.success(f"Prediksi Loan Status: {pred_label} ({prob:.2f}%)")
-
-            except Exception as e:
-                st.error(f"Terjadi kesalahan saat memproses data: {e}")
-
-if __name__ == '__main__':
-    main()
+        with st.spinner
