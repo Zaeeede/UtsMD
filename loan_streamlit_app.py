@@ -3,7 +3,23 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-# Load model dan tools preprocessing
+# === Fungsi tambahan seperti pada OOP ===
+def medianval(df, col):
+    return np.median(df[col].dropna())
+
+def fillingnawithmedian(df, col):
+    median_value = medianval(df, col)
+    df[col].fillna(median_value, inplace=True)
+    return df
+
+def correct_values(df, cat_cols):
+    # Normalisasi teks kategori
+    df['person_gender'] = df['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
+    for col in cat_cols:
+        df[col] = df[col].astype(str).str.strip().str.lower().str.title()
+    return df
+
+# === Load model dan tools preprocessing ===
 with open('model_xgb.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
@@ -16,10 +32,16 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
+# === Preprocessing Function ===
 def preprocess_data(data, encoder, scaler):
     try:
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
+
+        data = correct_values(data, cat_cols)
+
+        for col in num_cols:
+            data = fillingnawithmedian(data, col)
 
         data_encoded = pd.DataFrame(
             encoder.transform(data[cat_cols]),
@@ -45,6 +67,7 @@ def preprocess_data(data, encoder, scaler):
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
         st.stop()
 
+# === Streamlit App ===
 def main():
     st.title('Machine Learning Loan Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
@@ -60,9 +83,8 @@ def main():
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    # Input pengguna
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
-    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique))
+    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
     income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
     emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
