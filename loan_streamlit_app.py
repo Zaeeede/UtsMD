@@ -181,10 +181,12 @@ def main():
                 'person_home_ownership', 'loan_amnt', 'loan_intent', 'loan_int_rate',
                 'loan_percent_income', 'cb_person_cred_hist_length', 'credit_score',
                 'previous_loan_defaults_on_file'
-            ]:
+        ]:
                 if key in st.session_state:
                     del st.session_state[key]
             st.experimental_rerun()
+            st.stop()
+
 
 if __name__ == '__main__':
     main()
