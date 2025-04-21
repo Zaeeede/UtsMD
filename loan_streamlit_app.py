@@ -16,21 +16,8 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
-def clean_categories(series):
-    return (
-        series
-        .dropna()
-        .astype(str)
-        .str.lower()
-        .str.replace(' ', '')
-        .unique()
-    )
-
 def preprocess_data(data, encoder, scaler):
     try:
-        for col in encoder.feature_names_in_:
-            data[col] = data[col].str.lower().str.strip()
-
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
 
@@ -103,10 +90,6 @@ def main():
         'credit_score': credit_score,
         'previous_loan_defaults_on_file': default_history
     }])
-
-    for col in cat_features:
-        if col in user_data.columns:
-            user_data[col] = user_data[col].astype(str).str.lower().str.strip()
 
     with st.expander('*Data yang Anda Masukkan*'):
         st.dataframe(user_data)
