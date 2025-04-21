@@ -94,18 +94,18 @@ def main():
     with col1:
         if st.button("✅ Test Case: Approved"):
             st.session_state.update({
-                'person_age': 40,
-                'person_gender': 'male',
+                'person_age': 22,
+                'person_gender': 'female',
                 'person_education': 'Master',
-                'person_income': 120000.0,
-                'person_emp_exp': 15,
-                'person_home_ownership': 'MORTGAGE',
-                'loan_amnt': 3000.0,
-                'loan_intent': 'MEDICAL',
-                'loan_int_rate': 8.5,
-                'loan_percent_income': 0.025,
-                'cb_person_cred_hist_length': 10,
-                'credit_score': 780,
+                'person_income': 71948.0,
+                'person_emp_exp': 0,
+                'person_home_ownership': 'RENT',
+                'loan_amnt': 35000.0,
+                'loan_intent': 'PERSONAL',
+                'loan_int_rate': 16.02,
+                'loan_percent_income': 0.49,
+                'cb_person_cred_hist_length': 3,
+                'credit_score': 561,
                 'previous_loan_defaults_on_file': 'No'
             })
 
