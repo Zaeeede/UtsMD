@@ -128,8 +128,14 @@ def main():
             })
 
     # Form input user
+    # === Bagian Form input user ===
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, max_age, value=st.session_state.get('person_age', 40))
-    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()), index=sorted(data['person_gender'].dropna().unique()).index(st.session_state.get('person_gender', 'female')))
+
+# Hanya menampilkan opsi 'male' dan 'female'
+    gender_options = ['male', 'female']
+    default_gender = st.session_state.get('person_gender', 'female')
+    gender = st.selectbox("Apa gender anda?:", gender_options, index=gender_options.index(default_gender) if default_gender in gender_options else 0)
+
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()), index=sorted(data['person_education'].dropna().unique()).index(st.session_state.get('person_education', 'Master')))
     income = st.number_input("Pendapatan Tahunan:", 0.0, max_income, value=st.session_state.get('person_income', 30000.0))
     emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, max_emp_exp, value=st.session_state.get('person_emp_exp', 5))
