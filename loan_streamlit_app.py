@@ -62,7 +62,7 @@ def main():
 
     # Input pengguna
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
-    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique)
+    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique))
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
     income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
     emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
