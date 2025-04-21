@@ -72,49 +72,8 @@ def main():
     st.subheader('NIM: 2702354741')
     st.info('This app will predict your Loan Status!')
 
-    try:
-        data = pd.read_csv('Dataset_A_loan.csv')
-    except FileNotFoundError:
-        st.error("File Dataset_A_loan.csv tidak ditemukan!")
-        return
-
-    cat_features = loaded_encoder.feature_names_in_
-    num_features = loaded_scaler.feature_names_in_
-
-    age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
-    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()))
-    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
-    income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
-    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
-    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
-    loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()))
-    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()))
-    loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
-    loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
-    cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()))
-    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
-    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
-
-    user_data = pd.DataFrame([{
-        'person_age': age,
-        'person_gender': gender,
-        'person_education': education,
-        'person_income': income,
-        'person_emp_exp': emp_exp,
-        'person_home_ownership': home_ownership,
-        'loan_amnt': loan_amnt,
-        'loan_intent': loan_intent,
-        'loan_int_rate': loan_int_rate,
-        'loan_percent_income': loan_percent_income,
-        'cb_person_cred_hist_length': cb_length,
-        'credit_score': credit_score,
-        'previous_loan_defaults_on_file': default_history
-    }])
-
-    with st.expander('Data yang Anda Masukkan'):
-        st.dataframe(user_data)
-
-    # Test Case Buttons
+    # Test Case Buttons (Moved under header)
+    st.markdown("### Test Cases")
     col1, col2 = st.columns(2)
 
     if col1.button("✅ Test Case: Approved"):
@@ -150,6 +109,51 @@ def main():
             'credit_score': 470,
             'previous_loan_defaults_on_file': 'Yes'
         })
+
+    # Try to load the dataset
+    try:
+        data = pd.read_csv('Dataset_A_loan.csv')
+    except FileNotFoundError:
+        st.error("File Dataset_A_loan.csv tidak ditemukan!")
+        return
+
+    # === Input form ===
+    cat_features = loaded_encoder.feature_names_in_
+    num_features = loaded_scaler.feature_names_in_
+
+    # Set default values from session_state if present
+    age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()), value=st.session_state.get('person_age', 20))
+    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()), index=sorted(data['person_gender'].dropna().unique()).index(st.session_state.get('person_gender', 'male')))
+    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()), index=sorted(data['person_education'].dropna().unique()).index(st.session_state.get('person_education', 'Master')))
+    income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()), value=st.session_state.get('person_income', 30000.0))
+    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()), value=st.session_state.get('person_emp_exp', 0))
+    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()), index=sorted(data['person_home_ownership'].dropna().unique()).index(st.session_state.get('person_home_ownership', 'MORTGAGE')))
+    loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()), value=st.session_state.get('loan_amnt', 5000.0))
+    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()), index=sorted(data['loan_intent'].dropna().unique()).index(st.session_state.get('loan_intent', 'MEDICAL')))
+    loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()), value=st.session_state.get('loan_int_rate', 10.0))
+    loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()), value=st.session_state.get('loan_percent_income', 0.05))
+    cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()), value=st.session_state.get('cb_person_cred_hist_length', 5))
+    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()), value=st.session_state.get('credit_score', 650))
+    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()), index=sorted(data['previous_loan_defaults_on_file'].dropna().unique()).index(st.session_state.get('previous_loan_defaults_on_file', 'No')))
+
+    user_data = pd.DataFrame([{
+        'person_age': age,
+        'person_gender': gender,
+        'person_education': education,
+        'person_income': income,
+        'person_emp_exp': emp_exp,
+        'person_home_ownership': home_ownership,
+        'loan_amnt': loan_amnt,
+        'loan_intent': loan_intent,
+        'loan_int_rate': loan_int_rate,
+        'loan_percent_income': loan_percent_income,
+        'cb_person_cred_hist_length': cb_length,
+        'credit_score': credit_score,
+        'previous_loan_defaults_on_file': default_history
+    }])
+
+    with st.expander('Data yang Anda Masukkan'):
+        st.dataframe(user_data)
 
     # Predict Button
     if st.button("Prediksi"):
