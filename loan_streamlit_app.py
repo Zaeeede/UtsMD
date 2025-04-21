@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-# === Fungsi tambahan seperti pada OOP ===
+# Fungsi tambahan untuk preprocessing
 def medianval(df, col):
     return np.median(df[col].dropna())
 
@@ -13,11 +13,11 @@ def fillingnawithmedian(df, col):
     return df
 
 def correct_values(df):
-    # Hanya memperbaiki nilai pada kolom 'person_gender'
+    # Memperbaiki nilai pada kolom 'person_gender'
     df['person_gender'] = df['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
     return df
 
-# === Load model dan tools preprocessing ===
+# Load model dan tools preprocessing
 with open('model_xgb.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
@@ -30,7 +30,7 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
-# === Preprocessing Function ===
+# Fungsi untuk preprocessing data
 def preprocess_data(data, encoder, scaler):
     try:
         cat_cols = encoder.feature_names_in_
@@ -65,7 +65,7 @@ def preprocess_data(data, encoder, scaler):
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
         st.stop()
 
-# === Streamlit App ===
+# Streamlit App
 def main():
     st.title('Machine Learning Loan Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
@@ -79,10 +79,12 @@ def main():
         return
 
     # Handle non-numeric or missing values for 'person_income'
-    max_income = 20000  # Default max value
-
     if pd.api.types.is_numeric_dtype(data['person_income']):
-        max_income = float(data['person_income'].max())  # Update max_income to max value if it's numeric
+        max_income = data['person_income'].max()
+        min_income = data['person_income'].min()
+    else:
+        max_income = 20000  # Default max value if person_income is not numeric
+        min_income = 0  # Default min value
 
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
@@ -93,7 +95,7 @@ def main():
     education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
     income = st.number_input(
         "Pendapatan Tahunan:",
-        min_value=0.0,
+        min_value=min_income,
         max_value=max_income,
         value=st.session_state.get('person_income', 20000)  # Default value for income
     )
