@@ -121,7 +121,7 @@ def main():
                 'loan_amnt': 30000.0,
                 'loan_intent': 'DEBTCONSOLIDATION',
                 'loan_int_rate': 19.5,
-                'loan_percent_income': 1.5,
+                'loan_percent_income': 0.5,
                 'cb_person_cred_hist_length': 1,
                 'credit_score': 470,
                 'previous_loan_defaults_on_file': 'Yes'
