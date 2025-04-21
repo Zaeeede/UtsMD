@@ -12,11 +12,9 @@ def fillingnawithmedian(df, col):
     df[col].fillna(median_value, inplace=True)
     return df
 
-def correct_values(df, cat_cols):
-    # Normalisasi teks kategori
+def correct_values(df):
+    # Hanya memperbaiki nilai pada kolom 'person_gender'
     df['person_gender'] = df['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
-    for col in cat_cols:
-        df[col] = df[col].astype(str).str.strip().str.lower().str.title()
     return df
 
 # === Load model dan tools preprocessing ===
@@ -38,7 +36,7 @@ def preprocess_data(data, encoder, scaler):
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
 
-        data = correct_values(data, cat_cols)
+        data = correct_values(data)  # Memperbaiki gender tanpa normalisasi kolom kategorikal lainnya
 
         for col in num_cols:
             data = fillingnawithmedian(data, col)
