@@ -81,19 +81,59 @@ def main():
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()))
-    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()))
-    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()))
-    income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()))
-    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()))
-    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()))
-    loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()))
-    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()))
-    loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()))
-    loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()))
-    cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()))
-    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()))
-    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()))
+    # Menambahkan tombol untuk Test Case Rejected dan Approved
+    col1, col2 = st.columns(2)
+
+    # Test Case Approved
+    if col1.button("✅ Test Case: Approved"):
+        st.session_state.update({
+            'person_age': 40,
+            'person_gender': 'male',
+            'person_education': 'Master',
+            'person_income': 120000,
+            'person_emp_exp': 15,
+            'person_home_ownership': 'MORTGAGE',
+            'loan_amnt': 3000,
+            'loan_intent': 'MEDICAL',
+            'loan_int_rate': 8.5,
+            'loan_percent_income': 0.025,
+            'cb_person_cred_hist_length': 10,
+            'credit_score': 780,
+            'previous_loan_defaults_on_file': 'No'
+        })
+
+    # Test Case Rejected
+    if col2.button("❌ Test Case: Rejected"):
+        st.session_state.update({
+            'person_age': 22,
+            'person_gender': 'female',
+            'person_education': 'High School',
+            'person_income': 15000,
+            'person_emp_exp': 1,
+            'person_home_ownership': 'RENT',
+            'loan_amnt': 30000,
+            'loan_intent': 'DEBTCONSOLIDATION',
+            'loan_int_rate': 19.5,
+            'loan_percent_income': 1.5,
+            'cb_person_cred_hist_length': 1,
+            'credit_score': 470,
+            'previous_loan_defaults_on_file': 'Yes'
+        })
+
+    # Ambil data dari session state
+    age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, int(data['person_age'].max()), value=st.session_state.get('person_age', 30))
+    gender = st.selectbox("Apa gender anda?:", sorted(data['person_gender'].dropna().unique()), index=sorted(data['person_gender'].dropna().unique()).index(st.session_state.get('person_gender', 'female')))
+    education = st.selectbox("Pendidikan Terakhir:", sorted(data['person_education'].dropna().unique()), index=sorted(data['person_education'].dropna().unique()).index(st.session_state.get('person_education', 'High School')))
+    income = st.number_input("Pendapatan Tahunan:", 0.0, float(data['person_income'].max()), value=st.session_state.get('person_income', 20000))
+    emp_exp = st.number_input("Pengalaman Kerja (tahun):", 0, int(data['person_emp_exp'].max()), value=st.session_state.get('person_emp_exp', 5))
+    home_ownership = st.selectbox("Kepemilikan Rumah:", sorted(data['person_home_ownership'].dropna().unique()), index=sorted(data['person_home_ownership'].dropna().unique()).index(st.session_state.get('person_home_ownership', 'RENT')))
+    loan_amnt = st.number_input("Jumlah Pinjaman:", 0.0, float(data['loan_amnt'].max()), value=st.session_state.get('loan_amnt', 15000))
+    loan_intent = st.selectbox("Tujuan Pinjaman:", sorted(data['loan_intent'].dropna().unique()), index=sorted(data['loan_intent'].dropna().unique()).index(st.session_state.get('loan_intent', 'DEBTCONSOLIDATION')))
+    loan_int_rate = st.number_input("Suku Bunga Pinjaman:", 0.0, float(data['loan_int_rate'].max()), value=st.session_state.get('loan_int_rate', 10.0))
+    loan_percent_income = st.number_input("Persentase Pendapatan tahunan untuk Pinjaman:", 0.0, float(data['loan_percent_income'].max()), value=st.session_state.get('loan_percent_income', 0.03))
+    cb_length = st.number_input("Panjang Riwayat Kredit (tahun):", 0, int(data['cb_person_cred_hist_length'].max()), value=st.session_state.get('cb_person_cred_hist_length', 5))
+    credit_score = st.slider("Skor Kredit:", 0, int(data['credit_score'].max()), value=st.session_state.get('credit_score', 650))
+    default_history = st.selectbox("Apakah pernah gagal bayar sebelumnya?", sorted(data['previous_loan_defaults_on_file'].dropna().unique()), index=sorted(data['previous_loan_defaults_on_file'].dropna().unique()).index(st.session_state.get('previous_loan_defaults_on_file', 'No')))
 
     user_data = pd.DataFrame([{
         'person_age': age,
