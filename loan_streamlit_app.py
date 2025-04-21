@@ -181,12 +181,15 @@ def main():
                 'person_home_ownership', 'loan_amnt', 'loan_intent', 'loan_int_rate',
                 'loan_percent_income', 'cb_person_cred_hist_length', 'credit_score',
                 'previous_loan_defaults_on_file'
-        ]:
+            ]:
                 if key in st.session_state:
                     del st.session_state[key]
-            st.experimental_rerun()
+            st.session_state["reset_flag"] = True
             st.stop()
 
-
+# === Rerun aman setelah reset ===
 if __name__ == '__main__':
+    if st.session_state.get("reset_flag"):
+        del st.session_state["reset_flag"]
+        st.experimental_rerun()
     main()
