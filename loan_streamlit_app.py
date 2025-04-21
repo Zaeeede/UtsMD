@@ -3,19 +3,22 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
+#function mencari nilai median
 def medianval(df, col):
     return np.median(df[col].dropna())
 
+#function untuk mengisi nilai nan menggunakan median
 def fillingnawithmedian(df, col):
     median_value = medianval(df, col)
     df[col].fillna(median_value, inplace=True)
     return df
 
+#memperbaiki kolumn gender
 def correct_values(df):
     df['person_gender'] = df['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
     return df
 
-# === Load model dan tools preprocessing ===
+#Load model dan tools preprocessing 
 with open('model_xgb.pkl', 'rb') as file:
     loaded_model = pkl.load(file)
 
@@ -31,7 +34,7 @@ with open('target_vals.pkl', 'rb') as file:
 with open('feature_names.pkl', 'rb') as file:
     loaded_feature_names = pkl.load(file)
 
-# === Preprocessing Function ===
+# Preprocessing Function
 def preprocess_data(data, encoder, scaler):
     try:
         cat_cols = encoder.feature_names_in_
@@ -66,7 +69,7 @@ def preprocess_data(data, encoder, scaler):
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
         st.stop()
 
-# === Streamlit App ===
+#   Streamlit App
 def main():
     st.title('Machine Learning Loan Status Prediction App')
     st.subheader('Name: Dennis Purnomo Yohaidi')
