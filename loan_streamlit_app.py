@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 
-# === Fungsi tambahan seperti pada OOP ===
 def medianval(df, col):
     return np.median(df[col].dropna())
 
@@ -13,7 +12,6 @@ def fillingnawithmedian(df, col):
     return df
 
 def correct_values(df):
-    # Hanya memperbaiki nilai pada kolom 'person_gender'
     df['person_gender'] = df['person_gender'].replace({'fe male': 'female', 'Male': 'male'})
     return df
 
@@ -30,13 +28,16 @@ with open('encoder.pkl', 'rb') as file:
 with open('target_vals.pkl', 'rb') as file:
     loaded_target_vals = pkl.load(file)
 
+with open('feature_names.pkl', 'rb') as file:
+    loaded_feature_names = pkl.load(file)
+
 # === Preprocessing Function ===
 def preprocess_data(data, encoder, scaler):
     try:
         cat_cols = encoder.feature_names_in_
         num_cols = scaler.feature_names_in_
 
-        data = correct_values(data)  # Memperbaiki gender tanpa normalisasi kolom kategorikal lainnya
+        data = correct_values(data)
 
         for col in num_cols:
             data = fillingnawithmedian(data, col)
@@ -54,12 +55,12 @@ def preprocess_data(data, encoder, scaler):
 
         all_features = pd.concat([data_encoded, data_scaled], axis=1)
 
-        model_features = loaded_model.get_booster().feature_names
-        missing = set(model_features) - set(all_features.columns)
-        if missing:
-            raise ValueError(f"Data yang diproses tidak memiliki fitur: {missing}")
+        # Gunakan fitur dari feature_names.pkl
+        if set(loaded_feature_names) != set(all_features.columns):
+            missing = set(loaded_feature_names) - set(all_features.columns)
+            raise ValueError(f"Fitur hilang dari data input: {missing}")
 
-        return all_features[model_features]
+        return all_features[loaded_feature_names]
 
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memproses data (preprocessing): {e}")
@@ -81,16 +82,14 @@ def main():
     cat_features = loaded_encoder.feature_names_in_
     num_features = loaded_scaler.feature_names_in_
 
-    # Menentukan nilai max yang valid untuk setiap inputan
     max_income = float(data['person_income'].max()) if isinstance(data['person_income'].max(), (int, float)) else 100000.0
     max_age = int(data['person_age'].max()) if isinstance(data['person_age'].max(), (int, float)) else 100
     max_emp_exp = int(data['person_emp_exp'].max()) if isinstance(data['person_emp_exp'].max(), (int, float)) else 50
     max_loan_amnt = float(data['loan_amnt'].max()) if isinstance(data['loan_amnt'].max(), (int, float)) else 1000000.0
     max_credit_score = int(data['credit_score'].max()) if isinstance(data['credit_score'].max(), (int, float)) else 850
 
-    # Menambahkan tombol untuk tes case
     col1, col2 = st.columns(2)
-    
+
     with col1:
         if st.button("✅ Test Case: Approved"):
             st.session_state.update({
@@ -127,11 +126,7 @@ def main():
                 'previous_loan_defaults_on_file': 'Yes'
             })
 
-    # Form input user
-    # === Bagian Form input user ===
     age = st.number_input("Umur Anda (maksimal 144 tahun):", 20, max_age, value=st.session_state.get('person_age', 40))
-
-# Hanya menampilkan opsi 'male' dan 'female'
     gender_options = ['male', 'female']
     default_gender = st.session_state.get('person_gender', 'female')
     gender = st.selectbox("Apa gender anda?:", gender_options, index=gender_options.index(default_gender) if default_gender in gender_options else 0)
@@ -174,7 +169,6 @@ def main():
                 prediction = loaded_model.predict(processed_data)[0]
                 prediction_probs = loaded_model.predict_proba(processed_data)
 
-            # Mapping prediksi ke label
                 label_mapping = {0: "Ditolak", 1: "Diterima"}
                 pred_label = label_mapping.get(prediction, str(prediction))
                 prob = prediction_probs[0][prediction] * 100
